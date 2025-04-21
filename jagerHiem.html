@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JS Synth Sound Creator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input[type="range"], select {
+      width: 100%;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 20px;
+      width: 48%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #controls {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>JS Synth Sound Creator</h1>
+    <p>Use the controls below to create and experiment with sounds for your game.</p>
+    <label>
+      Frequency: <span id="freqValue">440</span> Hz
+      <input type="range" id="frequency" min="100" max="2000" value="440">
+    </label>
+    <label>
+      Waveform:
+      <select id="waveform">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+      </select>
+    </label>
+    <label>
+      Gain: <span id="gainValue">0.5</span>
+      <input type="range" id="gain" min="0" max="1" step="0.01" value="0.5">
+    </label>
+    <div id="controls">
+      <button id="playButton">Play Sound</button>
+      <button id="stopButton" disabled>Stop Sound</button>
+    </div>
+  </div>
+
+  <script>
+    let audioContext;
+    let oscillator;
+    let gainNode;
+    const playButton = document.getElementById('playButton');
+    const stopButton = document.getElementById('stopButton');
+    const frequencySlider = document.getElementById('frequency');
+    const freqValueDisplay = document.getElementById('freqValue');
+    const waveformSelect = document.getElementById('waveform');
+    const gainSlider = document.getElementById('gain');
+    const gainValueDisplay = document.getElementById('gainValue');
+
+    // Update frequency display and oscillator frequency in real-time.
+    frequencySlider.addEventListener('input', function() {
+      freqValueDisplay.textContent = this.value;
+      if (oscillator && audioContext) {
+        oscillator.frequency.setValueAtTime(this.value, audioContext.currentTime);
+      }
+    });
+
+    // Update gain display and gainNode gain in real-time.
+    gainSlider.addEventListener('input', function() {
+      gainValueDisplay.textContent = this.value;
+      if (gainNode && audioContext) {
+        gainNode.gain.setValueAtTime(this.value, audioContext.currentTime);
+      }
+    });
+
+    // When the Play button is clicked, start the oscillator.
+    playButton.addEventListener('click', function() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      oscillator = audioContext.createOscillator();
+      gainNode = audioContext.createGain();
+
+      // Set oscillator parameters.
+      oscillator.type = waveformSelect.value;
+      oscillator.frequency.setValueAtTime(frequencySlider.value, audioContext.currentTime);
+
+      // Set gain.
+      gainNode.gain.setValueAtTime(gainSlider.value, audioContext.currentTime);
+
+      // Connect oscillator -> gain -> destination.
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.start();
+      playButton.disabled = true;
+      stopButton.disabled = false;
+    });
+
+    // When the Stop button is clicked, stop the oscillator.
+    stopButton.addEventListener('click', function() {
+      if (oscillator) {
+        oscillator.stop();
+        oscillator.disconnect();
+        gainNode.disconnect();
+        oscillator = null;
+        gainNode = null;
+      }
+      playButton.disabled = false;
+      stopButton.disabled = true;
+    });
+  </script>
+</body>
+</html>

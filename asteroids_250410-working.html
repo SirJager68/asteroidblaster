@@ -1,0 +1,3640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press-Start+2P&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.ico">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>Asteroids</title>
+
+  <style>
+    html, body {
+        touch-action: none; /* Disables touch gestures */
+        background: black;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    canvas1 {
+        display: block;
+        position: absolute; /* Prevents flexbox from shrinking it */
+        width: 100%; /* Use full width */
+        height: 100%; /* Use full height */
+    }
+    canvas {
+        display: block;
+        width: 100%; /* Fixed width */
+        height: 100%; /* Fixed height */
+        border: 1px solid #333; /* Optional: adds a border for visibility */
+    }
+    canvas {
+    display: block;
+    filter: brightness(1.2) contrast(1.5) saturate(2);
+}
+
+
+    #mobileControls {
+        position: fixed;
+        bottom: 40px;
+        left: 90%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 20px;
+    }
+
+    #mobileControls button {
+        width: 150px;
+        height: 250px;
+        font-size: 24px;
+        border-radius: 10px;
+        border: 1px solid white;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgb(200, 255, 0);
+        touch-action: none;
+    }
+
+    * {
+        user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        -moz-user-select: none;
+    }
+
+    /* High Score Popup Styles */
+/* High Score Popup - Retro Arcade Style */
+/* High Score Popup - Retro Arcade Style */
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px; 
+    background: black;
+    border: 4px solid #00ccff; /* ✅ WarGames-style blue border */
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.8), 
+                0 0 25px rgba(0, 204, 255, 0.5);
+    text-align: center;
+    padding: 25px;
+    z-index: 1000;
+    animation: flicker 1.5s infinite alternate; /* ✅ Arcade flicker effect */
+}
+
+/* Text Styles */
+.popup h2 {
+    font-family: 'Press Start 2P', monospace; /* ✅ Arcade pixel font */
+    font-size: 20px;
+    color: #00ccff; /* ✅ Glowing blue WarGames text */
+    text-shadow: 0 0 8px rgba(0, 204, 255, 0.8);
+    margin-bottom: 15px;
+}
+
+.popup p {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* Input Field - WarGames / CRT Terminal Style */
+.popup input {
+    width: 90%;
+    font-size: 24px;
+    font-family: 'VT323', monospace; /* ✅ WarGames-style font */
+    text-transform: uppercase;
+    text-align: center;
+    background: black;
+    color: #00ccff;
+    border: 3px solid #00ccff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 204, 255, 0.8);
+    outline: none;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(0, 204, 255, 0.8);
+}
+
+/* Blue Glowing Save Button */
+.popup button {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    padding: 12px 25px;
+    background: black;
+    color: #00ccff;
+    border: 3px solid #00ccff;
+    cursor: pointer;
+    border-radius: 8px;
+    text-shadow: 0 0 5px rgba(0, 204, 255, 0.8);
+    box-shadow: 0 0 10px rgba(0, 204, 255, 0.8);
+    transition: all 0.3s ease-in-out;
+    margin-top: 15px;
+}
+
+/* Button Hover Effect */
+.popup button:hover {
+    background: #00ccff;
+    color: black;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.8);
+}
+
+/* CRT Scanline Effect (Optional) */
+.popup-content {
+    background: black;
+    padding: 20px;
+    border-radius: 10px;
+    position: relative;
+}
+
+/* Fake CRT scanlines effect */
+.popup-content::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(255, 255, 255, 0.05) 50%);
+    background-size: 100% 5px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Name Entry Popup - Same Style as High Score */
+input:focus {
+    touch-action: manipulation;
+    pointer-events: auto;
+}
+
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: black;
+    border: 4px solid #00ccff; /* WarGames-style blue border */
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.8), 
+                0 0 25px rgba(0, 204, 255, 0.5);
+    text-align: center;
+    padding: 25px;
+    z-index: 1000;
+    animation: flicker 1.5s infinite alternate;
+}
+
+
+/* Title Text */
+.popup h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 20px;
+    color: #00ccff;
+    text-shadow: 0 0 8px rgba(0, 204, 255, 0.8);
+    margin-bottom: 15px;
+}
+
+/* Input Field - WarGames / CRT Terminal Style */
+.popup input {
+    width: 90%;
+    font-size: 24px;
+    font-family: 'VT323', monospace;
+    text-transform: uppercase;
+    text-align: center;
+    background: black;
+    color: #00ccff;
+    border: 3px solid #00ccff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 204, 255, 0.8);
+    outline: none;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(0, 204, 255, 0.8);
+}
+
+/* Glowing Start Button */
+.popup button {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    padding: 12px 25px;
+    background: black;
+    color: #00ccff;
+    border: 3px solid #00ccff;
+    cursor: pointer;
+    border-radius: 8px;
+    text-shadow: 0 0 5px rgba(0, 204, 255, 0.8);
+    box-shadow: 0 0 10px rgba(0, 204, 255, 0.8);
+    transition: all 0.3s ease-in-out;
+    margin-top: 15px;
+}
+
+/* Button Hover Effect */
+.popup button:hover {
+    background: #00ccff;
+    color: black;
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.8);
+}
+
+
+
+/* Arcade Flicker Effect */
+@keyframes flicker {
+    0% { opacity: 1; box-shadow: 0 0 5px rgba(0, 204, 255, 0.8); }
+    100% { opacity: 0.9; box-shadow: 0 0 20px rgba(0, 204, 255, 0.4); }
+}
+
+#blacklightOverlayoff {
+    position: fixed; /* ✅ Ensures it covers the whole screen */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* ✅ Allows game input through */
+    background: radial-gradient(circle, rgba(0, 0, 255, 0.15) 0%, rgba(0, 0, 0, 0.9) 80%);
+    mix-blend-mode: screen; /* ✅ Makes colors appear glowing */
+    z-index: 9999; /* ✅ Ensures it's ABOVE everything */
+}
+canvass {
+  filter: brightness(1.4) contrast(2.5) saturate(4) hue-rotate(270deg);
+}
+/** @media screen and (min-width: 1024px) {**/
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 1024px;
+    max-height: 768px;
+    object-fit: contain; /* Ensure canvas scales without distortion */
+    /* Add a filter for brightness, contrast, and a slight hue shift */
+    filter: brightness(1.2) contrast(1.5) saturate(2);
+}
+/**} **/
+
+#blacklightOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0, 0, 255, 0.1) 0%, rgba(0, 0, 0, 0.9) 80%);
+    mix-blend-mode: screen;
+    z-index: 9999;
+}
+
+/* Add scanlines */
+#blacklightOverlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.05) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+    pointer-events: none;
+}
+  @font-face {
+    font-family: 'Hyperspace';
+    src: url('assets/Hyperspace.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+<!-- Blacklight Glow Overlay -->
+<div id="blacklightOverlay"></div>
+
+<!-- Custom High Score Popup -->
+<!-- High Score Popup -->
+<div id="highScorePopup" class="popup" style="display: none;">
+  <div class="popup-content">
+      <h2>🎉 HIGH SCORE! 🎉</h2>
+      <p>ENTER YOUR NAME:</p>
+      <input type="text" id="playerName" maxlength="20" placeholder="YOUR NAME">
+      <button onclick="submitHighScore()">SAVE</button>
+  </div>
+</div>
+<!-- Enter Name Popup -->
+<div id="enterNamePopup" class="popup" style="display: none;">
+  <div class="popup-content">
+      <h2>WELCOME</h2>
+      <p>ENTER YOUR SCREEN NAME:</p>
+      <input type="text" id="playerNameInput" maxlength="18" placeholder="YOUR NAME">
+      <button id="startGameBtn" disabled>ENTER</button>
+      <p>use spacebar to start</p>
+  </div>
+</div>
+
+
+<div id="mobileControls">
+   <!--<button id="leftBtn" style="opacity: 0.2;">←</button>
+   <button id="rightBtn" style="opacity: 0.2;">→</button>-->
+   <button id="thrustBtn" style="opacity: 0.4;">▲</button>
+   <button id="shootBtn" style="opacity: 0.5;">●</button>
+ </div>
+ <script src="../getuserdata.js"></script> <!-- Include the tracking script -->
+<script>
+///////////////////////////////////////////
+//            ASTEROIDS GAME
+//////////////////////////////////////////
+
+///////////////////////////////////////////
+//ADD USER DATA TO DB GAME ID **********
+///////////////////////////////////////////
+let gameID = "004"; // Set gameID directly in HTML file
+    let trackingSent = false; // Prevent duplicate calls
+
+    document.addEventListener("DOMContentLoaded", function() {
+      if (!trackingSent) {  // Ensure tracking only happens once
+        trackingSent = true;
+        getUserData("Cyberslots", gameID,versionGame);
+        }
+      });
+
+      function setUsername() {
+        const usernameInput = document.getElementById('username').value;
+        if (usernameInput) {
+          localStorage.setItem("username", usernameInput);
+          alert("Username saved!");
+        }
+      }
+///////////////////////////////////////////
+//END ADD USER DATA TO DB GAME ID *******
+///////////////////////////////////////////
+////////////////////////////////////
+// Canvas Setup
+////////////////////////////////////
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// Ensure canvas takes full screen
+function resizeCanvasold() {
+    canvas.width = 1024;
+    canvas.height = 768;
+}
+function resizeCanvas() {
+    // Get the CSS dimensions of the canvas
+    const cssWidth = canvas.clientWidth;
+    const cssHeight = canvas.clientHeight;
+
+    // Account for device pixel ratio (for retina displays)
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+
+    // Scale the context to match CSS pixels
+    ctx.scale(dpr, dpr);
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas(); // Set initial size
+
+////////////////////////////////////
+// Global Variables GAME THEME
+////////////////////////////////////
+//VERSION OF GAME CODED
+const gameVersion = '25.4.9.2';
+let versionGame = gameVersion;
+const gamedevloper = 'HAL9001 Entertainment May 3, 1981';
+const SERVER_URL = "http://localhost:3000";
+const reStartGame = "Press P to Play Again";
+
+
+/////////// Audio LOAD
+const thrustSound = new Audio("audio/thrust2.wav");
+thrustSound.loop = true;  // Thrust should loop when holding "Up"
+
+const shotSound = new Audio("audio/shot.wav");
+shotSound.volume = 0.2;
+const shotGun = new Audio("audio/gunShotgun.wav");
+const explosionSound = new Audio("audio/explo.wav");
+const shipBoom = new Audio("audio/shipboom.wav");
+const gameOver1 = new Audio("audio/gameover.wav");
+const gameOver2 = new Audio("audio/gameover2.wav");
+//TRUMPCLIPS
+// const trumpSoundYourFired = new Audio("audio/trumpSoundYourFired.mp3");
+//const trumpSoundGolden = new Audio("audio/goldenage.mp3");
+// Short beep sound for each asteroid hit
+//const beepSound = new Audio("audio/beepass.wav");
+//beepSound.volume = 0.8; 
+//winmusic = new Audio("audio/winmusic.wav"); // YMCA music
+
+// Initial variables
+let startGameOnce = 1; // Start game once
+let showVariables = false;  // Show variables on screen for DEBUG
+let adjustedSpeed = 1;         // Speed multiplier
+let dogeyes = 0;
+let score = 0;
+let scoreTotal = 0;         // Total score is score times accuracy
+let shieldStrength = 0;     // 1-hit shield
+let isExploding = false;    // Track if ship is exploding
+let level = 1;              // Start at level 1
+let levelWin = 90;           // Win at level X
+let lives = 3;              // 3 ships total
+let shipFragments = [];
+let lastTime = 0;
+let highScores = [];        // Array to store high scores
+let topScore = 0;           // Store the highest score
+let topScore20 = 1;         // Store the 20th score
+let saveScore = 0;          // Save score once
+let bulletCounterS = 0;    // How many bullets are fired
+let bulletHits = 0;        // How many hits on Asteroids
+let accuracy = 0;          // Accuracy of shots
+let scrMultiplier = 1; // Score multiplier to get 1 trillion score
+let scrAdj = .6; // Adjust score for adding new levels and keeping score reasonable
+let tradingCardScore = 1000000; // Score to earn trading card
+let tradingCardEarned = true;  // Trading card earned fla
+let showCredits = false;
+let showDebug = false;     // Show debug info
+let highScoreTrigger = false; // Trigger high score fetch
+let mobile = "NO"
+let mobileDetect = false;
+let landscape = "NO";
+let allowScroll = false;
+let isInvincible = true;  // Prevents immediate collisions after respawn
+let invincibilityDuration = 2000;  // 2 seconds (in milliseconds)
+let sizeAdjust = 0; // Adjust size for mobile
+let sizeAdjustShip = 0; // Adjust size for ship from original drawing
+let originalGame = 1; // trigger to show code for origional game
+let addShipScore = 10000; // Score to add an extra ship
+let ufo = null;       // To hold the UFO instance
+let ufoSpawnInterval = null;
+let mainUFOSpawnCount = 0; // Global counter for main UFO spawns.
+let enemyBullets = []; // ufo bullets
+let levelStartTime = Date.now();
+
+// LOAD GAME IMAGES
+//const ImageWin = new Image();
+//ImageWin.src = "images/trumpWin.jpg";
+//const ImageLose = new Image();
+//ImageLose.src = "images/trumpYourFired.jpg";
+//const tradingCardImage = new Image();
+//tradingCardImage.src = "images/trillioncard.jpg";
+// SHIP IMAGES
+let shipColor = "white";
+let asteroidColor = "#bbbbbb";
+//let shipImage = new Image();
+//shipImage.src = "images/doge.png";
+//const shipImg = new Image();
+//shipImg.src = "images/doge.png";
+//const lifeIcon = new Image(); // iCON FOR LIVES
+//lifeIcon.src = "images/doge.png";
+//const level1Img = new Image();
+//level1Img.src = "images/doge.png";
+//const level2Img = new Image();
+//level2Img.src = "images/trumpfight.png";
+// GAME IMAGES SIZES
+let swidthTopImage = 225;
+let sheightTopImage = 223;
+const levelWidth = swidthTopImage;
+const levelHeight = sheightTopImage;
+
+//LEVEL OPTIONS
+
+let useBgGrid = false; // Use background grid
+const asteroidImg = new Image(); // Image for asteroids
+let asteroidImgX = false; // turn off image for asteroids will turn on in transition
+    // Define level properties
+let levelsX = {
+    1: { Image: "images/trumpflag.jpg", text: "You got rid of some waste and fraud. \nNow let's go after the Deep State." },
+    2: { Image: "images/trumpfight.png", text: "You got rid of some waste and fraud. \nNow let's go after the Deep State."},
+    3: { Image: "images/trumpflag.jpg", text: "GREAT \nCan You Achieve DARK MAGA", },
+    4: { Image: "images/darkmaga.jpg", text: "☣️DARK MAGA☣️", },
+    5: { Image: "images/darkmaga.jpg", text: "☣️DARK MAGA☣️", },
+    600: { Image: "images/trumpliveslvl.jpg", text: "OBEY! CONSUME!" , audioFile: "audio/chewbubblegum.mp3", asteroidImg: "images/theylive2.png" },
+    900: { Image: "images/trumpWin.jpg", text: "You Saved the American Taxpayers" },
+    901: { Image: "images/trumpYourFired.jpg", text: "You may as well \nbe a Democrat" }
+  };
+let shipLevels = {
+  1: { shipImg: "images/doge.png", shipColor: "white" },
+  2: { shipImg: "images/trumpfight.png", shipColor: "white" },
+  3: { shipImg: "images/trumpfight.png", shipColor: "white" },
+  4: { shipImg: "images/trumpfight.png", shipColor: "white" },
+  5: { shipImg: "images/trumpfight.png", shipColor: "white" },
+  600: { shipImg: "images/trumpliveschr.png", shipColor: "white" },
+}
+let blackholeX = false; // Turn off blackhole
+
+
+
+// Interval (ms) between beeps (start relatively high = slower music)
+let beepInterval = 45; 
+// We'll count up time to see if we pass beepInterval
+let beepTimer = 0;
+
+// For game over sequence
+let gameOverActive = false; 
+let gameOverStart = 0;     // Timestamp (ms) when game over began
+let gameOverEnd = 0;       // Timestamp (ms) when game over ended
+let winGame = false;       // Win game flag
+
+
+
+// INITIALIZE LEVEL TRANSITION VARIABLES
+let levelTransitionActive = false; // Track if level transition is happening
+let levelTransitionStart = 0;      // Timestamp for transition start
+
+
+let frameCount = 0;
+let detectedRefreshRate = 60; // Default to 60Hz
+let measuring = true;
+let gameStarted = false;
+let startTime;
+
+// WHAT DEVICES ARE WE USING
+// Global variables to store detected values
+let deviceType = "Unknown";
+let operatingSystem = "Unknown";
+let browserName = "Unknown";
+
+function detectDeviceInfo() {
+    let ua = navigator.userAgent;
+
+    // Detect Device Type
+    if (ua.includes("Mobi") || ua.includes("Android") || ua.includes("iPhone")) {
+        deviceType = "Mobile";
+    } else if (ua.includes("iPad") || ua.includes("Tablet")) {
+        deviceType = "Tablet";
+    } else {
+        deviceType = "Desktop";
+    }
+
+    // Detect OS
+    if (ua.includes("Windows")) {
+        operatingSystem = "Windows";
+    } else if (ua.includes("Mac OS") || ua.includes("Macintosh")) {
+        operatingSystem = "MacOS";
+    } else if (ua.includes("Android")) {
+        operatingSystem = "Android";
+    } else if (ua.includes("iPhone")) {
+        operatingSystem = "iOS (iPhone)";
+    } else if (ua.includes("iPad")) {
+        operatingSystem = "iOS (iPad)";
+    } else if (ua.includes("Linux")) {
+        operatingSystem = "Linux";
+    }
+
+    // Detect Browser
+    if (ua.includes("Chrome") && !ua.includes("Edg") && !ua.includes("OPR")) {
+        browserName = "Chrome";
+    } else if (ua.includes("Firefox")) {
+        browserName = "Firefox";
+    } else if (ua.includes("Safari") && !ua.includes("Chrome")) {
+        browserName = "Safari";
+    } else if (ua.includes("Edg")) {
+        browserName = "Edge";
+    } else if (ua.includes("OPR") || ua.includes("Opera")) {
+        browserName = "Opera";
+    } else if (ua.includes("MSIE") || ua.includes("Trident")) {
+        browserName = "Internet Explorer";
+    }
+
+    // Log to console for debugging
+    console.log(`Device: ${deviceType}, OS: ${operatingSystem}, Browser: ${browserName}`);
+}
+
+// Run the function immediately
+detectDeviceInfo();
+
+// Now you can use these variables anywhere in your game code
+console.log("Device Type:", deviceType);
+console.log("Operating System:", operatingSystem);
+console.log("Browser Name:", browserName);
+
+// SHOW MOBILE BUTTONS IN STYLE
+function isMobileDevice() {
+        return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let mobileControls = document.getElementById("mobileControls");
+        if (!isMobileDevice()) {
+            mobileControls.style.display = "none"; // Hide if not on mobile
+        }
+    });
+
+//DETECT MONILE PHONE
+function isMobile() {
+    return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+}
+window.onload = function () {
+    if (isMobile()) {
+        document.getElementById("mobileControls").style.display = "block";
+        mobile = "YES";
+        mobileDetect = true;
+    }
+};
+// IS DEVICE LANSCAPE OR HORIZONTAL
+function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+}
+
+if (isLandscape()) {
+    console.log("Device is in landscape mode! ✅");
+    landscape = "YES";
+} else {
+    console.log("Device is in portrait mode! 🔄");
+    landscape = "NO";
+}
+
+//Adjust size for Mobile
+if (isMobile() && !isLandscape()) {
+  sizeAdjust = 1;
+} else {
+  sizeAdjust = 1;
+}
+
+
+
+// ======================================= Show PopUp
+// Player Name
+// 🎵 Load Background Music
+let startScreenMusic = new Audio("audio/PixelDarkShadowLoop.mp3"); // Change to your music file
+startScreenMusic.loop = true;
+startScreenMusic.volume = 0.6; 
+
+// 🎵 Click Sound Effect for "Start" Button
+let startClickSound = new Audio("audio/startClick.mp3");
+
+// Mute Toggle State
+let isMuted = false;
+let showStartGame = false; // dont show Start Game Button yet
+
+if (originalGame == 0) {
+    // Show the startup screen when the game loads
+    showStartupScreen();
+    startScreenMusic.play(); // Start background music
+  if (!isMobile()) { //============NO NAME FOR MOBILE RIGHT NOW BECAUSE  OF SCREEN RESIZE =========FIX
+
+    // Function to Show Name Entry Screen
+    function showNameEntryScreen() {
+        document.getElementById("enterNamePopup").style.display = "flex";
+    }
+
+    // ✅ Enable "Start Game" Button When Name is Entered
+    document.getElementById("playerNameInput").addEventListener("input", function() {
+        let name = this.value.trim();
+        document.getElementById("startGameBtn").disabled = (name.length === 0);
+    });
+
+    // ✅ Save Name & Start Game on Button Click
+    document.getElementById("startGameBtn").addEventListener("click", function() {
+        let playerName = document.getElementById("playerNameInput").value.trim();
+        if (playerName.length > 0) {
+            localStorage.setItem("playerName", playerName); // Save name
+            document.getElementById("enterNamePopup").style.display = "none"; // Hide popup
+            //startScreenMusic.pause(); // Stop music when starting game
+            startClickSound.play(); // Click sound effect
+            savePlayerName(); // Save the player name
+            showStartGame = true; // Show the game screen
+            //showStartupScreen(); // Now show the main start screen
+        }
+    });
+
+      // ✅ Show Name Entry Popup When the Game Loads
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(showNameEntryScreen, 500); // Show after a short delay
+    });
+    } else {
+      showStartGame = true;
+  }
+
+  // ======================================= STARTUP SCREEN
+  // PLayer Name
+  let playerName = localStorage.getItem("playerName") || "Guest";
+  console.log("Loaded Player Name:", playerName);
+  function savePlayerName() {
+      let inputField = document.getElementById("playerNameInput");
+      let enteredName = inputField.value.trim();
+      
+      if (enteredName.length > 0) {
+          localStorage.setItem("playerName", enteredName);
+          playerName = enteredName; // Update the global variable
+
+          console.log("Player name saved:", playerName);
+          
+
+          // ✅ Refresh the startup screen to show the name
+          showStartupScreen();
+      }
+  }
+  function displayPlayerName() {
+      let nameDisplay = document.getElementById("playerNameDisplay");
+      if (nameDisplay) {
+          nameDisplay.textContent = `PLAYER: ${playerName}`;
+      }
+  }
+
+
+}
+// 🖼️ Load banner Image
+let bannerImage = new Image();
+bannerImage.src = "images/asteroidsBanner.jpg";
+
+//let isImageLoaded = false;
+//dogeImage.onload = () => {
+//    isImageLoaded = true;
+//    showStartupScreen(); // ✅ Ensure startup screen is shown when image loads
+//};
+
+// 🔇 **Mute Button State**
+//let isMuted = false;
+
+// 🔘 **Button Areas**
+let startButton = { x: 0, y: 0, width: 0, height: 0 };
+let muteButton = { x: 0, y: 0, width: 0, height: 0 };
+
+// 🔄 **Animation Variables**
+let loadingDots = 0;  
+let countdown = 3; 
+let loadingComplete = false; 
+let flickerState = true; // Flickering effect for "Press Start"
+let showText = true; // used in startup screen of original game
+let flashInterval; // Interval for flashing text for startup screen
+
+// 🚀 **Show Startup Screen**
+
+  let startupActive = true; // Track if the startup screen is still active
+
+
+  // ===============================================================Start Up Screen Versions
+  // ** different versions of startup screen for differenbt game versions
+
+    function showStartupScreen() {
+      if (!startupActive) return; // Stop drawing once game starts
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the flashing "PUSH START" text
+      if (showText) {
+        ctx.save(); // Save the current drawing state
+
+        // Set the glow/shadow properties
+        ctx.shadowColor = "#bbbbbb";   // Glow color (blueish)
+        ctx.shadowBlur = 20;           // Adjust the blur for desired glow size
+        ctx.shadowOffsetX = 0;         // Ensure no horizontal offset
+        ctx.shadowOffsetY = 0;         // Ensure no vertical offset
+
+        ctx.fillStyle = "#CCCCCC";     // Text color
+        ctx.font = "30px 'Hyperspace', sans-serif"; // Ensure Hyperspace font is loaded
+        ctx.textAlign = "center";
+        ctx.fillText("PUSH START", canvas.width / 2, 200);
+        ctx.font = "20px 'Hyperspace', sans-serif"; // Ensure Hyperspace font is loaded
+        ctx.fillText("[Press SpaceBar]", canvas.width / 2, 240);
+        ctx.font = "30px 'Hyperspace', sans-serif"; // Ensure Hyperspace font is loaded
+
+        // ======================================== TOP 10 HIGH SCORES FROM FETCH HIGH SCORES
+        // Inside showStartupScreen(), after drawing PUSH START text.
+        // Inside showStartupScreen(), after drawing the PUSH START text.
+        if (highScores.length > 0) {
+          // Draw the "TOP SCORES" header.
+          ctx.font = "30px 'Hyperspace', sans-serif"; // Ensure Hyperspace font is loaded.
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillText("High Scores", canvas.width / 2, 300);
+          
+          // Set up the column positions.
+          // Adjust these x positions as necessary for your canvas and design.
+          const rankX = canvas.width / 2 - 150;
+          const scoreX = canvas.width / 2 - 75;
+          const nameX = canvas.width / 2 + 50;
+
+          
+          // Draw the column headers.
+          //ctx.font = "20px sans-serif";
+          const headerY = 320;
+          ctx.textAlign = "left";
+          //ctx.fillText("Rank", rankX, headerY);
+          //ctx.fillText("Score", scoreX, headerY);
+          //ctx.fillText("Name", nameX, headerY);
+
+          
+          // Optionally draw a line under the headers.
+          //ctx.beginPath();
+          //ctx.moveTo(rankX, headerY + 5);
+          //ctx.lineTo(scoreX + 60, headerY + 5); // extend the line a bit.
+          //ctx.strokeStyle = "#FFFFFF";
+          //ctx.stroke();
+          
+          // Draw each high score on its own row.
+          highScores.slice(0, 10).forEach((scoreObj, index) => {
+            const yPos = headerY + 30 + index * 30; // Space rows 25px apart.
+            ctx.fillText(`${index + 1}`, rankX, yPos);
+            // Append two spaces after the username.
+            ctx.fillText(`${scoreObj.score}`, scoreX, yPos);
+            ctx.fillText(`${scoreObj.username}`, nameX, yPos);
+          });
+        } else {
+          // Draw a message if no scores are available.
+          ctx.fillText("No High Scores Yet", canvas.width / 2, 300);
+        }
+
+        // ✅ 80s Retro Footer
+        ctx.font = "20px 'Hyperspace', sans-serif"; // Ensure Hyperspace font is loaded.
+        ctx.textAlign = "center";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.fillText('1 COIN 1 PLAY', canvas.width/2 - 20, canvas.height-95);
+        //ctx.fillText(rotationSpeed, 20, 450);
+        ctx.fillText('1979 Atari Inc', canvas.width/2-20, canvas.height-35);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.fontsize = "9px";
+        ctx.fillText(gameVersion, 30, canvas.height - 10);  
+        ctx.fillText(gamedevloper, canvas.width/2-20, canvas.height-10);
+        ctx.fillText('Level' + level , canvas.width/2+200, canvas.height-10);
+        //ctx.restore(); // Restore canvas state
+
+
+        ctx.shadowBlur = 0; // Reset glow
+        ctx.shadowColor = "transparent";
+
+        ctx.restore(); // Restore the previous drawing state
+      }
+
+      // Continue updating using requestAnimationFrame
+      requestAnimationFrame(showStartupScreen);
+  }
+
+    // Toggle the visibility of the flashing text every 500ms
+    //flashInterval = setInterval(() => {
+    //  showText = !showText;
+    //}, 500);
+
+    // Listen for the spacebar to start the game
+    document.addEventListener("keydown", function (e) {
+      if (startupActive && e.code === "Space") {
+        startupActive = false;
+        clearInterval(flashInterval);
+        startScreenMusic.pause();
+        startGame(); // Replace with your game-start function
+      }
+    });
+    // ================MOBILE SCREEN TOUCH START
+    document.addEventListener("touchstart", function (e) {
+    if (startupActive) {
+      startupActive = false;
+      clearInterval(flashInterval);
+      startScreenMusic.pause();
+      startGame(); // Replace with your game-start function
+    }
+    });
+  
+
+  // ===============================================================Start Up Screen Deluxe
+  // ** Used on Demaroids
+  // ** Can use on other asteroid versions
+  // ** sould not us on original. This will have 'old' after it if it is not used
+  // ** find the showStartupScreen function to see which one is being used
+  function showStartupScreenOLDDelux() {
+    if (!startupActive) return; // 🔥 Prevent the screen from re-drawing after game start
+    console.log("Show Startup Screen");
+      // ✅ **Clear Canvas**
+    // if (!isImageLoaded) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 🔲 Background
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 🖼️ Draw Image at Top
+      let dogeSize = 30;
+      //ctx.drawImage(bannerImage, (canvas.width / 2) - (dogeSize / 2), 50, dogeSize, dogeSize);
+      ctx.drawImage(bannerImage, 0, 0, canvas.width, canvas.height * 0.3);
+
+
+      // 🎮 **Game Title**
+      ctx.fillStyle = "yellow";
+      ctx.font = "bold 50px 'Press Start 2P', monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("🕹️ Asteroids 🕹️", canvas.width / 2, 300);
+
+      // 🏆 **High Score Display**
+      ctx.fillStyle = "cyan";
+      ctx.font = "bold 24px 'Press Start 2P', monospace";
+      ctx.fillText("WELCOME: " + playerName.toUpperCase(), canvas.width / 2, 340);
+      ctx.fillText("HIGH SCORE: $" + (topScore * scrMultiplier).toLocaleString(), canvas.width / 2, 370);
+      
+      // 📢 **Updates Section**
+      ctx.fillStyle = "lime";
+      ctx.font = "18px 'VT323', monospace"; 
+      ctx.fillText("LATEST UPDATES:", canvas.width / 2, 420);
+      ctx.fillText("none yet", canvas.width / 2, 450);
+      ctx.fillText("", canvas.width / 2, 480);
+
+      // 🔄 **Loading Animation**
+      // Loading Game Animation (Moving Dots)
+      if (!loadingComplete) {
+          let dots = ".".repeat(loadingDots % 4);
+          ctx.fillStyle = "cyan";
+          ctx.font = "26px 'VT323', monospace"; 
+          ctx.fillText(`Loading Game${dots}`, canvas.width / 2, 540);
+
+          loadingDots++;
+          setTimeout(showStartupScreen, 500);
+          return;
+      } else {
+          ctx.fillStyle = "lime";
+          ctx.font = "bold 32px 'VT323', monospace";
+          ctx.fillText("GAME LOADED!", canvas.width / 2, 540);
+      }
+
+      // 🔊 **Mute/Unmute Button**
+      drawMuteButton();
+
+      if (!loadingComplete) {
+          loadingDots++;
+          setTimeout(showStartupScreen, 500);
+          return;
+      }
+
+      // 🟡 **Countdown "READY" before Start**
+      if (countdown > 0) {
+          ctx.fillStyle = "yellow";
+          ctx.font = "bold 40px 'VT323', monospace";
+          ctx.fillText(`READY... ${countdown}`, canvas.width / 2, 600);
+          setTimeout(() => {
+              countdown--;
+              showStartupScreen();
+          }, 1000);
+          return;
+      }
+      if (showStartGame === true ) {  // Show Start game after user is entered in poup
+        // 🟢 **"Press Start" Button**
+        ctx.save();
+        let buttonX = canvas.width / 2 - 120;
+        let buttonY = 550;
+        let buttonWidth = 240;
+        let buttonHeight = 60;
+
+        ctx.shadowColor = "cyan";
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+        ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+        ctx.strokeStyle = "cyan";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+        ctx.restore();
+
+        // ✨ **Flickering "PRESS START" Text**
+        if (flickerState) {
+            ctx.fillStyle = "cyan";
+            ctx.font = "bold 32px 'VT323', monospace";
+            ctx.fillText("PRESS START", canvas.width / 2, 590);
+        }
+        flickerState = !flickerState;
+
+        // ✅ **Save button area**
+        startButton = { x: buttonX, y: buttonY, width: buttonWidth, height: buttonHeight };
+
+        // 🖱️ **Listen for clicks**
+        canvas.addEventListener("click", handleStartupClick);
+      }
+      if (startupActive) {
+          setTimeout(showStartupScreen, 500); // Keep updating ONLY if still active
+      }
+  }
+
+// 🔊 **Draw Mute Button**
+function drawMuteButton() {
+    let muteX = canvas.width - 80;
+    let muteY = 20;
+    let muteSize = 50;
+
+    ctx.save();
+    ctx.shadowColor = "cyan";
+    ctx.shadowBlur = 10;
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(muteX, muteY, muteSize, muteSize);
+    ctx.strokeStyle = "cyan";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(muteX, muteY, muteSize, muteSize);
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 30px 'VT323', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(isMuted ? "🔇" : "🔊", muteX + muteSize / 2, muteY + 35);
+
+    ctx.restore();
+
+    // ✅ Store Mute Button Area
+    muteButton = { x: muteX, y: muteY, width: muteSize, height: muteSize };
+}
+
+  // 🖱️ **Detect Clicks on Start & Mute Buttons**
+  function handleStartupClick(event) {
+      let rect = canvas.getBoundingClientRect();
+      let mouseX = event.clientX - rect.left;
+      let mouseY = event.clientY - rect.top;
+
+      // ✅ **Check if "Start" Button Clicked**
+      if (
+          mouseX >= startButton.x &&
+          mouseX <= startButton.x + startButton.width &&
+          mouseY >= startButton.y &&
+          mouseY <= startButton.y + startButton.height
+      ) {
+          startScreenMusic.pause(); // Stop the music when the game starts
+          canvas.removeEventListener("click", handleStartupClick);
+          startClickSound.play();
+          startupActive = false; // 🔥 STOP startup screen updates
+          startGame();
+      }
+
+      // ✅ **Check if Mute Button Clicked**
+      if (
+          mouseX >= muteButton.x &&
+          mouseX <= muteButton.x + muteButton.width &&
+          mouseY >= muteButton.y &&
+          mouseY <= muteButton.y + muteButton.height
+      ) {
+          toggleMute();
+      }
+  }
+
+  // 🔊 **Toggle Mute**
+  function toggleMute() {
+      isMuted = !isMuted;
+      if (isMuted) {
+          startScreenMusic.pause();
+      } else {
+          startScreenMusic.play().catch(() => console.log("Music blocked. Needs user interaction."));
+      }
+      drawMuteButton();
+  }
+
+  // ✅ **Start Music ONLY when user interacts**
+  document.addEventListener("click", () => {
+      if (!isMuted) {
+          startScreenMusic.play().catch(() => console.log("Music blocked. Needs user interaction."));
+      }
+  }, { once: true }); // ✅ Only runs once
+
+  // ✅ **Startup Delay**
+  setTimeout(() => {
+      loadingComplete = true; 
+  }, 3000); 
+
+  // 🎮 **Show the Startup Screen**
+  if (startGameOnce === 1) {
+    showStartupScreen();
+    startGameOnce = 0;
+  }
+
+
+
+  //================================================= END STARTUP SCREEN
+
+  //================================================= ENHANCED STARTUP SCREEN
+  function showStartupScreen2() {
+      let countdown = 5; // 5-second countdown
+      let imagelevel = new Image();
+      imagelevel.src = "images/doge.png";
+
+      let dotCount = 0;  // Controls dot animation
+      let loadingActive = true; // ✅ Prevents interference after game starts
+
+      const countdownInterval = setInterval(() => {
+          // Clear canvas and draw transition screen
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "#000000";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Define image size and draw image
+          let swidth = 225;
+          let sheight = 223;
+          ctx.drawImage(imagelevel, (canvas.width / 2) - 100, 25, swidth, sheight);
+
+          if (isMobile()) {
+              ctx.drawImage(startupImage, 0, 0, canvas.width, canvas.height);
+          }
+
+          // **80s Arcade Font with Glow Effect**
+          ctx.fillStyle = "yellow";
+          ctx.textAlign = "center";
+          ctx.font = "bold 32px 'Press Start 2P', monospace";
+          //ctx.shadowColor = "red";
+          //ctx.shadowBlur = 10;
+
+          // **Fixed "Starting in X..." Text**
+          ctx.fillText(`Starting in ${countdown}...`, canvas.width / 2, canvas.height - 50);
+
+          // **Animated "Game Loading..." with Moving Dots**
+          let dots = ".".repeat(dotCount % 4); // Cycles: ".", "..", "...", ""
+          ctx.fillStyle = "cyan"; // Different color for a retro effect
+          ctx.font = "26px 'Press Start 2P', monospace";
+          ctx.fillText(`Game Loading${dots}`, canvas.width / 2, canvas.height / 2 - 20);
+          ctx.fillText("Please Wait...", canvas.width / 2, canvas.height / 2 + 20);
+
+          // Update dot animation
+          dotCount++; // Move the dots
+
+          // Countdown Timer
+          countdown--;
+
+          if (countdown < 0) {
+              clearInterval(countdownInterval);
+              // ✅ Enable temporary invincibility after STARTING GAME
+              isInvincible = true;
+              setTimeout(() => {
+                  isInvincible = false;  // Remove invincibility after 2 seconds
+              }, invincibilityDuration);
+              loadingActive = false; // ✅ Prevents loading screen from drawing again
+              startGame();
+          }
+      }, 500); // Dot animation updates every 500ms (0.5 sec)
+  }
+
+  // ============================ Measure Refresh Rate for 2 Seconds
+  // measure refresh rate to set the screen frame rate for different screens
+  function measureRefreshRate() {
+      if (!startTime) startTime = performance.now();
+      let elapsed = (performance.now() - startTime) / 1000; // Convert to seconds
+
+      if (elapsed < 3) { 
+          frameCount++;
+          requestAnimationFrame(measureRefreshRate);
+      } else {
+          detectedRefreshRate = Math.round(frameCount / elapsed); // FPS Calculation
+          //detectedRefreshRate = 40;
+          //adjustedSpeed = .3;
+          adjustedSpeed = (60 / detectedRefreshRate); // Normalize movement
+          beepInterval = Math.round(45 / adjustedSpeed); // Adjust beep interval SOUNDTRACK
+          measuring = false;
+          console.log("Detected Refresh Rate:", detectedRefreshRate);
+          //startGame();
+      }
+  }
+
+  // **Display Loading Screen and Start Measuring**
+  //showLoadingScreen();
+  //showStartupScreen();
+  measureRefreshRate();
+
+
+  //======================================================== START GAME
+  // **Ensure Game Doesn't Start Until Measurement is Done**
+  function startGame() {
+      console.log("Game Starting with FPS:", detectedRefreshRate);
+      //blackHole = new BlackHole(400, 300, 2, 450);
+      let vStats = 1;
+      // ✅ Enable temporary invincibility to START GAME
+      isInvincible = true;
+      setTimeout(() => {
+        isInvincible = false;  // Remove invincibility after 2 seconds
+      }, invincibilityDuration);
+      requestAnimationFrame(update);
+  }
+
+  // Main game loop using detected refresh rate
+  let lastFrameTime = performance.now();
+  ////////////////////////////////////////////////////////
+
+
+  ////////////////////////////////////////////////////
+  // Function to toggle fullscreen (only on mobile)
+  // Function to check if the device is mobile
+  function isMobile() {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+
+  // Function to toggle fullscreen (only on mobile)
+  function toggleFullscreen() {
+      if (!isMobile()) {
+          console.log("📵 Fullscreen is only available on mobile.");
+          return; // Prevent fullscreen on non-mobile devices
+      }
+
+      let elem = document.documentElement;
+
+      // Try to enter fullscreen mode
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          if (elem.requestFullscreen) {
+              elem.requestFullscreen().catch(err => console.log("🔴 Fullscreen failed:", err));
+          } else if (elem.mozRequestFullScreen) {
+              elem.mozRequestFullScreen();
+          } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
+          } else if (elem.msRequestFullscreen) {
+              elem.msRequestFullscreen();
+          }
+          console.log("📱 Entering Fullscreen Mode (Mobile)");
+      } else {
+          // Exit fullscreen mode
+          if (document.exitFullscreen) {
+              document.exitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+          } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+          }
+          console.log("🔙 Exiting Fullscreen Mode (Mobile)");
+      }
+  }
+
+  // Ensure fullscreen button is clickable
+  document.addEventListener("DOMContentLoaded", function () {
+      let fullscreenBtn = document.getElementById("fullscreenBtn");
+      if (fullscreenBtn) {
+          fullscreenBtn.addEventListener("click", toggleFullscreen);
+      } else {
+          console.log("⚠️ Fullscreen button not found!");
+      }
+  });
+
+
+  //END TOGGLE FULLSCREEN
+
+// BLACKHOLE CLASS
+class BlackHole {
+  constructor(x, y, gravityStrength, radius) {
+    this.x = x;
+    this.y = y;
+    this.gravityStrength = gravityStrength; // Strength of the pull
+    this.radius = radius; // Area of effect
+  }
+
+  applyGravity(objects) {
+  objects.forEach(obj => {
+    let dx = this.x - obj.x;
+    let dy = this.y - obj.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < this.radius && distance > 5) { 
+      let force = this.gravityStrength / Math.max(distance * 0.5, 10); // ✅ Smoother gravity falloff
+
+      // ✅ Limit max pull force so the ship isn't stuck
+      const maxForce = 1; // Lower value = easier escape
+      force = Math.min(force, maxForce);
+      
+
+      let angle = Math.atan2(dy, dx);
+      let forceX = Math.cos(angle) * force;
+      let forceY = Math.sin(angle) * force;
+
+      obj.vx += forceX;
+      obj.vy += forceY;
+
+      console.log(`Applying Gravity to ${obj === ship ? "Ship" : "Asteroid"}`, { 
+        x: obj.x, y: obj.y, forceX, forceY, vx: obj.vx, vy: obj.vy 
+      });
+    }
+  });
+}
+
+  draw(ctx) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.opacity = 0.5;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(128, 0, 128, 0.2)"; // Fainter purple outline
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius/10, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.opacity = 0.5;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0, 256, 128, 0.2)"; // Fainter purple outline
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+let blackHole = null; // Global variable, initially null
+
+
+// ✅ Ensure this class is defined BEFORE anything references `BlackHole`
+
+// ✅ Call startGame() at the correct time (after page load)
+//window.onload = startGameX;
+////////////////////////////////////
+// Asteroid Class
+////////////////////////////////////
+
+//asteroidImg.src = "images/theylive2.png"; // ✅ Change this to your asteroid image path
+
+
+class Asteroid {
+
+  constructor(x, y, size, speed, angle, imageSrc, shakeAmt, label) {
+    this.x = x;
+    this.y = y;
+    this.size = size * sizeAdjust;
+    this.speed = speed;
+    this.angle = angle;
+    this.shakeAmt = shakeAmt || 0; // ✅ Ensures it's always a number
+    //this.label = getRandomAsteroidName(); // do not get asteroids names for the original version
+    //this.sizeMultiplier = 0.8 + Math.random() * 0.4; // ✅ Random between 0.8 and 1.2
+    this.sizeMultiplier = 1;
+    this.size = this.size * this.sizeMultiplier; // ✅ Apply random scaling
+    console.log(`Created Asteroid - Shake Received: ${this.shakeAmt}`); // ✅ Debugging log
+    this.imageSrc = imageSrc; // ✅ Store image path instead of full image object
+    this.image = null;
+    console.log(`Created Asteroid - Image Received: ${this.image}`); // ✅ Debugging log
+
+    // ✅ Load image once (if provided)
+    if (this.imageSrc) {
+      this.image = new Image();
+      this.image.src = this.imageSrc;
+    }
+
+    // Irregular polygon shape (classic asteroid)
+    this.rotation = Math.random() * 0.02 - 0.01;
+    this.rotationAngle = 0;
+    this.points = [];
+    let numPoints = Math.floor(Math.random() * 5) + 7; // 7-11
+    for (let i = 0; i < numPoints; i++) {
+      let theta = (i / numPoints) * Math.PI * 2;
+      let offset = 0.7 + Math.random() * 0.6; // 0.7 - 1.3
+      this.points.push({ angle: theta, radius: this.size * offset });
+    }
+  }
+  move() {
+    // ✅ Add small random jitter (shaking effect)
+    if (this.shakeAmt > 0) {
+            this.x += (Math.random() * this.shakeAmt) - (this.shakeAmt / 2);
+            this.y += (Math.random() * this.shakeAmt) - (this.shakeAmt / 2);
+        }
+
+    this.x += Math.cos(this.angle) * this.speed * adjustedSpeed;
+    this.y += Math.sin(this.angle) * this.speed * adjustedSpeed;
+    this.rotationAngle += this.rotation;
+    // Wrap edges
+    if (this.x < 0) this.x = canvas.width;
+    if (this.x > canvas.width) this.x = 0;
+    if (this.y < 0) this.y = canvas.height;
+    if (this.y > canvas.height) this.y = 0;
+  }
+  
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rotationAngle);
+
+    // CRT GLOW EFFECT
+    // Set up vector glow effect
+    ctx.strokeStyle = asteroidColor;         // Keep your existing ship color (e.g., white or cyan)
+    ctx.shadowColor = asteroidColor;         // Match shadow to stroke for a cohesive glow
+    ctx.shadowBlur = 10;                 // Add glow intensity (adjust as needed)
+    ctx.lineWidth = 1.5;                 // Thin lines for vector sharpness (optional)
+
+    if (this.image && this.image.complete) { 
+        // ✅ Draw asteroid image ONLY when asteroidImgX is true
+        let drawSize = this.size; 
+        ctx.drawImage(this.image, -drawSize / 2, -drawSize / 2, drawSize*3, drawSize*3);
+    } else {
+        // ✅ Draw normal shape-based asteroid when asteroidImgX is false
+        ctx.beginPath();
+        for (let i = 0; i < this.points.length; i++) {
+            const p = this.points[i];
+            const px = Math.cos(p.angle) * p.radius;
+            const py = Math.sin(p.angle) * p.radius;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = '#aaaaaa'; // Use the same color as the stroke
+        ctx.stroke();
+
+        // Draw text label if available
+        if (this.label) {
+            if (isMobile()) {
+                ctx.font = "22px Arial";
+            } else {
+                ctx.font = "11px Arial";
+            }
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(this.label, 0, 0);
+        }
+    }
+    // Reset glow to avoid affecting other elements
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+
+    ctx.restore();
+}
+
+}
+
+////////////////////////////////////
+// Bullet Class
+////////////////////////////////////
+// Finite lifespan. Every 5th bullet is special (larger/flashing).
+class Bullet {
+  constructor(x, y, angle, color = "white", special = false) {
+    this.x = x;
+    this.y = y;
+    this.angle = angle;
+    this.speed = 7 * adjustedSpeed;
+    this.life = 100 / adjustedSpeed; // frames
+    this.color = color;
+    this.special = special;
+  }
+  move() {
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
+
+    // this will Wrap the bullet position to the other side of the screen
+    this.x = (this.x + canvas.width) % canvas.width;
+    this.y = (this.y + canvas.height) % canvas.height;
+    this.life--; // bullets only last for x number of frames as declred above.
+  }
+  draw() {
+    const bulletSize = this.special ? 2 : 2;
+    let fillColor = this.color;
+    ctx.strokeStyle = shipColor;         // Keep your existing ship color (e.g., white or cyan)
+    ctx.shadowColor = shipColor;         // Match shadow to stroke for a cohesive glow
+    ctx.shadowBlur = 10;                 // Add glow intensity (adjust as needed)
+    ctx.lineWidth = 1.5;                 // Thin lines for vector sharpness (optional)
+    //if (this.special) {
+      // Flash effect
+      //if (Math.floor(this.life / 5) % 2 === 0) {
+      //  fillColor = "yellow";
+      //} else {
+        fillColor = "rgba(255, 255, 255, 1)";
+     // }
+    //}
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(this.x, this.y, bulletSize, bulletSize);
+  }
+}
+
+////////////////////////////////////
+// UFO Class
+////////////////////////////////////
+let ufoColor = "white"; // Define UFO color (e.g., white or cyan).
+class UFO {
+  constructor(type = "main") {
+    this.type = type;
+    // Set properties based on UFO type.
+    if (this.type === "small") {
+      this.sizeAdjust = 0.15;      // Smaller drawing scale.
+      this.shootInterval = 1000;   // Shoots more frequently.
+      this.speed = (Math.random() < 0.5 ? 3 : -3); // Faster movement.
+    } else {
+      // Main UFO properties.
+      this.sizeAdjust = 0.3;
+      this.shootInterval = 1500;
+      this.speed = (Math.random() < 0.5 ? 2 : -2);
+    }
+    // Set starting position horizontally (from off-screen).
+    if (Math.random() < 0.5) {
+      this.x = -50; // Start from left.
+    } else {
+      this.x = canvas.width + 50; // Start from right.
+    }
+    // Choose a random vertical position (upper half of the screen).
+    this.y = Math.random() * canvas.height * 0.5;
+    this.angle = 0;  // No rotation by default.
+    this.active = true;
+    this.lastShotTime = Date.now();
+  }
+
+  move() {
+    // Move horizontally, with adjusted speed multiplier.
+    this.x += this.speed * adjustedSpeed; // 'adjustedSpeed' defined elsewhere.
+    // Mark UFO inactive if it goes off-screen.
+    if (this.speed > 0 && this.x > canvas.width + 50) {
+      this.active = false;
+    } else if (this.speed < 0 && this.x < -50) {
+      this.active = false;
+    }
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.strokeStyle = ufoColor;   // Use your defined UFO color.
+    ctx.shadowColor = ufoColor;
+    ctx.shadowBlur = 10;
+    ctx.lineWidth = 1.0;
+    // Multiply base scale by sizeAdjust; for the main UFO, sizeAdjust is 0.3; for small UFO, it's 0.15.
+    const s = this.sizeAdjust * 3;
+    // Draw the UFO saucer body.
+    ctx.beginPath();
+    ctx.moveTo(-30 * s, 0 * s);
+    ctx.lineTo(30 * s, 0 * s);
+    ctx.lineTo(15 * s, 10 * s);
+    ctx.lineTo(-15 * s, 10 * s);
+    ctx.lineTo(-30 * s, 0 * s);
+    ctx.lineTo(-15 * s, -15 * s);
+    ctx.lineTo(15 * s, -15 * s);
+    ctx.lineTo(30 * s, 0 * s);
+    ctx.lineTo(15 * s, -15 * s);
+    ctx.lineTo(10 * s, -25 * s);
+    ctx.lineTo(-10 * s, -25 * s);
+    ctx.lineTo(-15 * s, -15 * s);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  shoot() {
+    // Only shoot if the ship exists.
+    if (typeof ship === "undefined" || !ship) return;
+    
+    const now = Date.now();
+    if (now - this.lastShotTime >= this.shootInterval) {
+      // For small UFO, use a lower maxOffset to keep shots more accurate.
+      const maxOffset = (this.type === "small") ? 200 : 800;
+      const offsetAngle = Math.random() * 2 * Math.PI;
+      const offsetRadius = Math.random() * maxOffset;
+      const targetX = ship.x + offsetRadius * Math.cos(offsetAngle);
+      const targetY = ship.y + offsetRadius * Math.sin(offsetAngle);
+      
+      // Compute the shooting angle.
+      const dx = targetX - this.x;
+      const dy = targetY - this.y;
+      const angle = Math.atan2(dy, dx);
+      
+      console.log(`UFO (${this.type}) shooting: target (${targetX.toFixed(2)}, ${targetY.toFixed(2)}), angle: ${angle.toFixed(2)}`);
+      const bulletSpeed = 4;
+      if (enemyBullets.length > 50 / adjustedSpeed) return;
+      let bullet = new Bullet(this.x, this.y, angle, bulletSpeed);
+      enemyBullets.push(bullet);
+      
+      this.lastShotTime = now;
+    }
+  }
+}
+
+
+////////////////////////////////////
+// Debris Class
+////////////////////////////////////
+class Debris {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    // Random velocity for explosion effect
+    //this.vx = (Math.random() - 0.5) * 5;
+    //this.vy = (Math.random() - 0.5) * 5;
+    //this.life = 50; // frames
+    //make more like original . above is demaroids explosion
+    this.vx = (Math.random() - 0.5) * 7;
+    this.vy = (Math.random() - 0.5) * 7;
+    this.life = 20; // frames
+  }
+  move() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life--;
+  }
+  draw() {
+    //let alpha = this.life / 50; dont use this so turn off for original game
+    //ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`; this is a fade out effect for explosion
+    ctx.fillStyle = `rgba(255, 255, 255, 1)`;
+    ctx.beginPath();
+    //ctx.arc(this.x, this.y, 2, 0, Math.PI * 2); demaroids version
+    ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+const debrisPieces = [];
+
+////////////////////////////////////
+// Ship Class (Triangle)
+////////////////////////////////////
+let rotationSpeed = 0.05 * adjustedSpeed; // Adjusted rotation speed
+class Ship {
+  constructor() {
+    this.x = canvas.width / 2;
+    this.y = canvas.height / 2;
+    this.angle = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.thrusting = false;
+    this.turnLeft = false;
+    this.turnRight = false;
+    this.bulletCounter = 0;
+    this.bullets = [];
+  }
+  move() {
+    //const rotationSpeed = 0.05;
+    if (this.turnLeft) this.angle -= rotationSpeed;
+    if (this.turnRight) this.angle += rotationSpeed;
+    if (this.thrusting) {
+      const acceleration = 0.1;
+      this.vx += Math.cos(this.angle) * acceleration * adjustedSpeed;
+      this.vy += Math.sin(this.angle) * acceleration * adjustedSpeed;
+
+      
+    }
+    // friction
+    this.vx *= 0.99;
+    this.vy *= 0.99;
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Wrap edges
+    if (this.x < 0) this.x = canvas.width;
+    if (this.x > canvas.width) this.x = 0;
+    if (this.y < 0) this.y = canvas.height;
+    if (this.y > canvas.height) this.y = 0;
+  }
+
+  draw() {
+    sizeAdjustShip = .3;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+
+// Set up vector glow effect
+    ctx.strokeStyle = shipColor;         // Keep your existing ship color (e.g., white or cyan)
+    ctx.shadowColor = shipColor;         // Match shadow to stroke for a cohesive glow
+    ctx.shadowBlur = 10;                 // Add glow intensity (adjust as needed)
+    ctx.lineWidth = 1.0;
+
+    //ctx.strokeStyle = shipColor;
+    //ctx.shadowColor = shipColor; // ✅ Neon glow effect
+    //ctx.shadowBlur = 0; // ✅ Increase glow intensity
+    ctx.beginPath();
+    // original ship dimensions from sketch
+    ctx.moveTo(56 *sizeAdjustShip, 0);
+    ctx.lineTo(-40 * sizeAdjustShip, -32 * sizeAdjustShip);
+    ctx.lineTo(-24 * sizeAdjustShip, -16 * sizeAdjustShip);
+    ctx.lineTo(-24 * sizeAdjustShip, 16 * sizeAdjustShip);
+    ctx.lineTo(-40 * sizeAdjustShip, 32 * sizeAdjustShip);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Reset glow to avoid affecting other elements
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+  // DRAW SHIP IMAGES FOR EACH LEVEL
+  // Adjust ship width/height as you like
+  //if (level === 1) {
+
+    //let shipImg = shipLevels[level].shipImg;
+    //console.log(`Ship Image: ${shipImg}`);
+    // ✅ Load Ship Image (if available)
+    //shipImage.src = shipImageSrc;
+    let swidth = 50;
+    let sheight = 50;
+    const shipImgWidth = swidth * sizeAdjustShip;
+    const shipImgHeight = sheight * sizeAdjustShip;
+    //ctx.drawImage(shipImg, -shipImgWidth / 2, -shipImgHeight / 2, shipImgWidth, shipImgHeight);
+    ctx.restore();
+  //} else {
+  //  let shipImg = level2Img;
+   // let swidth = 50 * sizeAdjust;
+  //  let sheight = 50 * sizeAdjust;
+  //  const shipImgWidth = swidth;
+  //  const shipImgHeight = sheight;
+  //  ctx.drawImage(shipImg, -shipImgWidth / 2, -shipImgHeight / 2, shipImgWidth, shipImgHeight);
+  //  ctx.restore();
+  //}
+
+  // MAKE CODE MORE EFFICIENT FOR SHILED AND INVINCIBILITY
+  // IF SHIELD IS AVAILABLE
+  if (isInvincible) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = "yellow";  // invincible shield color //invincible shield color
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, 18 * sizeAdjust, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  if (shieldStrength > 0) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    if (isInvincible) {
+      ctx.strokeStyle = "yellow";  // invincible shield color //invincible shield color
+    } else {
+      ctx.strokeStyle = "rgba(255,255,0,.3)";  // single-hit shield color
+    }
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 18 * sizeAdjust, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+  shoot() {
+    if (level === 98) return; // stop scoring after WIN game 
+    this.bulletCounter++;
+    let special = (this.bulletCounter % 5 === 0);
+    let bulletColor = special ? "white" : "white";
+    this.bullets.push(new Bullet(this.x, this.y, this.angle, bulletColor, special));
+    if (isMobile()) {
+      playShotSound(); // play sound for mobile
+    } else {
+      //playShotSound(); // play sound for mobile
+    shotSound.currentTime = 0;  // play sound for computer
+    shotSound.play().catch(() => {});
+    }
+    // REDUCE SCORE FOR SHOTS  EFFICIENCY
+    //score -= 500 * level;
+    bulletCounterS++;
+  }
+
+
+  fireShotgun() {
+    if (level === 98) return; // stop scoring after WIN game 
+    let numPellets = 5; // Number of bullets per shot
+    let spreadAngle = 0.3; // Spread range in radians (0.3 ≈ 17 degrees)
+    if (!shotgunReady) return; // ✅ Prevent shooting if in cooldown
+
+    shotgunReady = false; // 🔒 Lock shooting temporarily
+    for (let i = 0; i < numPellets; i++) {
+        let angleOffset = (Math.random() - 0.5) * spreadAngle; // Random spread
+        let bulletAngle = ship.angle + angleOffset;
+        ship.bullets.push(new Bullet(ship.x, ship.y, bulletAngle));
+    }
+    // Play shotgun sound effect
+    if (isMobile()) {
+      playShotSound(); // play sound for mobile
+    } else {
+      //playShotSound(); // play sound for mobile
+    shotGun.currentTime = 0;  // play sound for computer
+    shotGun.play().catch(() => {});
+    }
+    //score -= 2000 * level;
+    bulletCounterS++;
+    setTimeout(() => {
+        shotgunReady = true;
+        console.log("🔄 Shotgun Ready Again!");
+    }, shotgunCooldown);
+  }
+}
+let shotgunReady = true; // ✅ Ensures a delay between shots
+const shotgunCooldown = 1000; // ✅ Cooldown time in milliseconds (1 sec)
+
+function fireShotgun2() {
+  if (!shotgunReady) return; // ✅ Prevent shooting if in cooldown
+    let numPellets = 5; // Number of bullets per shot
+    let spreadAngle = 0.3; // Spread range in radians (0.3 ≈ 17 degrees)
+
+    for (let i = 0; i < numPellets; i++) {
+        let angleOffset = (Math.random() - 0.5) * spreadAngle; // Random spread
+        let bulletAngle = ship.angle + angleOffset;
+        ship.bullets.push(new Bullet(ship.x, ship.y, bulletAngle));
+    }
+
+    // Play shotgun sound effect
+    shotSound.currentTime = 0;
+    shotSound.play().catch(() => {});
+    //score -= 1000 * level;
+    bulletCounterS++;
+}
+//NEW SHOOT SOUND BUFFER AND LOAD FOR MOBILE
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let shotBuffer = null;
+
+// Load sound using XMLHttpRequest
+let request = new XMLHttpRequest();
+request.open('GET', 'audio/shot.wav', true);
+request.responseType = 'arraybuffer';
+
+request.onload = function() {
+    audioCtx.decodeAudioData(request.response, function(buffer) {
+        shotBuffer = buffer;
+    });
+};
+request.send();
+
+////////////////////////////////////////////////////
+// FUNCTIONS
+/////////////////////////////////////////////////////
+
+// Play function for mobile
+function playShotSound() {
+    if (!shotBuffer) return;
+    let sound = audioCtx.createBufferSource();
+    sound.buffer = shotBuffer;
+    sound.connect(audioCtx.destination);
+    sound.start(0); // Play immediately
+}
+
+////////////////////////////////////
+// Game Objects & Functions
+////////////////////////////////////
+const ship = new Ship();
+let asteroids = [];
+
+
+////GETS RANDOM ASTEROID NAME
+function getRandomAsteroidName() {
+  let asteroidNames;
+  if (level === 1) { 
+    asteroidNames = [
+      "FEMA", "NASA", "USAID", "FBI", "CIA", "DOD", "FDA", "IRS", "CDC"
+    ];
+  } else if (level === 2) {
+    asteroidNames = [
+      "bernie", "aoc", "bernie", "maxine", "kamala"
+    ];
+  } else if (level === 3) {
+    asteroidNames = [
+      "pelosi", "chucky", "hillary", "soros", "biden"
+    ];
+  } else {
+    asteroidNames = [
+      "💀", "☣️", "💀", "☣️", "💀"
+    ];
+  }
+  return asteroidNames[Math.floor(Math.random() * asteroidNames.length)];
+}
+
+function startGameX() {
+  //blackHole = new BlackHole(canvas.width / 2, canvas.height / 2, 2, 100);
+}
+// Initialize first level
+spawnAsteroids(level);
+startGameX();
+getHighScore();
+
+//////////////////////////////
+//LEVEL OPTIONS NEED TO TAKE CARE OF BETTER PER LEVEL
+////////////////////////////
+// Spawns (5+level) asteroids at speeds 1.15^(level-1)
+function spawnAsteroids(level) {
+  let numAsteroids = 5 + level; 
+
+  //let numAsteroids = 3;
+  //if (level === 4) {
+    //useBgGrid = true; // Enable background grid for final level
+    //blackHole = new BlackHole(400, 300, 2, 450);
+    //blackHole = [
+    //new BlackHole(400, 300, 2, 450),  // First black hole
+    //new BlackHole(1000, 500, 2.5, 400) // Second black hole
+    //];
+    //let numAsteroids = 5;
+  //};
+  let speedMultiplier = Math.pow(1.15, level - 1);
+  // ✅ Enable temporary invincibility after NEXT LEVEL
+  isInvincible = true;
+  setTimeout(() => {
+    isInvincible = false;  // Remove invincibility after 2 seconds
+  }, invincibilityDuration);
+
+  // LEVEL OPTIONS
+  //let shakeAmount = Math.min(level * 0.5, 5) || 0; // ✅ Ensure it's a valid number
+    // ✅ Safely get asteroid image (or use null if not set)
+    //let asteroidImgSrc = levelsX[level].asteroidImg || null;
+    let asteroidImgSrc = null;
+
+    // ✅ Load image only if available
+    let asteroidImg = null;
+    if (asteroidImgSrc) {
+        asteroidImg = new Image();
+        asteroidImg.src = asteroidImgSrc;
+    }
+    console.log(`Asteroid Image Loaded:`, asteroidImg); // ✅ Check if image is loaded
+
+  for (let i = 0; i < numAsteroids; i++) {
+    let size = 20 + Math.random() * 10;
+    let baseSpeed = 1 + Math.random();
+    let finalSpeed = baseSpeed * speedMultiplier;
+    let angle = Math.random() * Math.PI * 2;
+    let shakeAmt = 0
+    console.log(`Asteroid ${i} - Shake Passed:`, shakeAmt); // ✅ Check before passing
+    asteroids.push(
+      new Asteroid(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height,
+        size, finalSpeed, angle, asteroidImgSrc, shakeAmt
+      ));
+  }
+}
+
+
+//=========================GAME CONTROLS ARROWS OR WASD setup
+/////////////////////////////////////////////////////////////
+// PLAY ON COMPUTER
+
+// ==Shooting and gun types
+let spacePressed = false; // Prevent holding from spamming shots
+let gunMachine = true;
+let gunMachineType = 50; //how fast bullets shoot
+let burstCount = 0;
+let burstInterval = null;
+
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space" && !spacePressed) { // Shoot when Space is pressed
+    spacePressed = true; // Prevent multiple triggers
+        burstCount = 0; // Reset shot counter
+
+        // Start burst fire many shots
+        // machine gun type will shoot 10 if less than 10 etc
+        burstInterval = setInterval(() => {
+            if (burstCount < 1) { // set to 1 shot for original game
+                ship.shoot(); // Fire a bullet
+                burstCount++;
+            } else {
+                clearInterval(burstInterval); // Stop firing after 20 shots
+            }
+        }, gunMachineType); // Adjust speed (100ms = 10 bullets per second)
+    }
+    // FIRE SHOTGUN
+    if (e.key === "v") {
+      //console.log("v pressed");
+        ship.fireShotgun();
+    }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.code === "Space") {
+        spacePressed = false; // Allow re-triggering after release
+        clearInterval(burstInterval); // Stop burst fire if key is released early
+    }
+});
+document.addEventListener("mousedown", (e) => {
+    if (e.button === 0) { // Left mouse button
+        ship.shoot();
+    }
+});
+// Key up
+document.addEventListener("keydown", (e) => {
+  // Arrow Control
+  if (e.key === "ArrowLeft") ship.turnLeft = true;
+  if (e.key === "ArrowRight") ship.turnRight = true;
+  if (e.key === "ArrowUp") {
+    ship.thrusting = true;
+    // Play thrust audio
+    // Reset to start so we can replay from beginning if needed
+    thrustSound.currentTime = 0;
+    thrustSound.play().catch(() => {});
+  }
+  // WASD Control
+  if (e.key === "a") ship.turnLeft = true;
+  if (e.key === "d") ship.turnRight = true;
+  if (e.key === "w") {
+    ship.thrusting = true;
+    // Play thrust audio
+    // Reset to start so we can replay from beginning if needed
+    thrustSound.currentTime = 0;
+    thrustSound.play().catch(() => {});
+  }
+
+});
+// Key Down
+document.addEventListener("keyup", (e) => {
+  if (e.key === "ArrowLeft") ship.turnLeft = false;
+  if (e.key === "ArrowRight") ship.turnRight = false;
+  if (e.key === "ArrowUp") ship.thrusting = false;
+
+  ship.thrusting = false;
+  // Stop/pause thrust audio
+  thrustSound.pause();
+  // Optionally reset to 0 so it restarts from beginning next time
+  thrustSound.currentTime = 0;
+  //WASD CONTROL
+  if (e.key === "a") ship.turnLeft = false;
+  if (e.key === "d") ship.turnRight = false;
+  if (e.key === "w") ship.thrusting = false;
+  ship.thrusting = false;
+  // Stop/pause thrust audio
+  thrustSound.pause();
+  // Optionally reset to 0 so it restarts from beginning next time
+  thrustSound.currentTime = 0;
+});
+
+if (vStats = 1) { //don't let happen until game starts
+    // ==RESTART THE GAME and Other Key Options
+    document.addEventListener("keydown", (e) => {
+      let key = e.key.toLowerCase();
+
+      if (key === 'p') {
+          window.location.href = "demaroids.html"; // Replace with your main game page
+      }
+      if (key === 'i') {
+          showDebug = !showDebug; // Toggle debug mode
+      }
+      if (key === 'o') {
+          winGame = true;
+      }
+      if (key === 'h') {
+          highScoreTrigger = true;
+      }
+      if (key === 'x') {
+          gunMachine = !gunMachine // Toggle debug mode
+      }
+
+      // Check if key is a number between '1' and '9' to change levels
+      if (key >= '1' && key <= '9') {
+          level = parseInt(key); // Convert key to a number
+          console.log(`📢 Jumping to Level: ${level}`);
+          // Restart the level properly
+          //levelTransitionActive = true;
+          //levelTransitionStart = performance.now();
+          //stopGameLoop();
+          //handleLevelTransition(level, score, accuracy);
+      }
+  });
+
+}
+
+// =================================GRID OVERLAY FOR
+function drawGrid(ctx, blackHoles) {
+  if (!blackHoles || blackHoles.length === 0) return; // ✅ Prevent error if blackHoles is missing
+
+  let gridSize = 35; // Spacing of the grid
+  ctx.strokeStyle = "rgba(0, 200, 255, 0.3)"; // ✅ Neon blue color (adjust opacity if needed)
+  ctx.lineWidth = 1;
+
+  ctx.shadowBlur = 10; // ✅ Add a glow effect
+  ctx.shadowColor = "rgba(0, 200, 255, 0.8)"; // ✅ Glowing blue color
+
+  // ✅ Draw vertical grid lines
+  for (let x = 0; x < canvas.width; x += gridSize) {
+    ctx.beginPath();
+    for (let y = 0; y <= canvas.height; y += gridSize) {
+      let { distortedX, distortedY } = distortPoint(x, y, blackHoles);
+      if (y === 0) ctx.moveTo(distortedX, distortedY);
+      else ctx.lineTo(distortedX, distortedY);
+    }
+    ctx.stroke();
+  }
+
+  // ✅ Draw horizontal grid lines
+  for (let y = 0; y < canvas.height; y += gridSize) {
+    ctx.beginPath();
+    for (let x = 0; x <= canvas.width; x += gridSize) {
+      let { distortedX, distortedY } = distortPoint(x, y, blackHoles);
+      if (x === 0) ctx.moveTo(distortedX, distortedY);
+      else ctx.lineTo(distortedX, distortedY);
+    }
+    ctx.stroke();
+  }
+
+  ctx.shadowBlur = 0; // Reset glow for other drawings
+}
+
+
+function distortPoint(x, y, blackHoles) {
+    if (!blackHoles || blackHoles.length === 0) {
+        return { distortedX: x, distortedY: y }; // ✅ No distortion if no black holes
+    }
+
+    let totalDistortionX = 0;
+    let totalDistortionY = 0;
+
+    blackHoles.forEach(blackHole => {
+        let dx = blackHole.x - x;
+        let dy = blackHole.y - y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > blackHole.radius) return; // ✅ Ignore points too far away
+
+        let maxDistort = 50;
+        let gravityMultiplier = 700;
+        let distanceFalloff = 9;
+
+        let force = (blackHole.gravityStrength * gravityMultiplier) / Math.max(distance * 0.5, 30);
+        let falloff = 1 / (1 + Math.pow(distance / (blackHole.radius / distanceFalloff), 2));
+
+        force *= falloff;
+        let distortionFactor = Math.min(force, maxDistort);
+
+        let angle = Math.atan2(dy, dx); // ✅ Define angle within the loop
+
+        totalDistortionX += Math.cos(angle) * distortionFactor;
+        totalDistortionY += Math.sin(angle) * distortionFactor;
+    });
+
+    return {
+        distortedX: x + totalDistortionX,
+        distortedY: y + totalDistortionY
+    };
+}
+
+let blackHoles = [];
+function spawnBlackHoles(level) {
+    blackHoles = []; // Reset array
+
+    if (level === 4) {
+        blackHoles.push(new BlackHole(400, 300, 2, 450)); // 1st Black Hole
+        //console.log("Black Hole 1 Created");
+        blackholeX = true
+    } else if (level === 5) {
+        blackHoles.push(new BlackHole(400, 300, 3, 500));  // Main Black Hole
+        blackHoles.push(new BlackHole(800, 600, 2, 300));  // Second smaller Black Hole
+    } else if (level >= 8) {
+        //blackHoles.push(new BlackHole(400, 300, 3, 500));  // Main Black Hole
+        //blackHoles.push(new BlackHole(800, 600, 2, 300));  // Second smaller Black Hole
+    }
+}
+
+
+//=========================== PLAY ON MOBILE
+
+let mobiletest = 3;
+
+///////MOBILE TEST 3
+if (mobiletest === 3 ){
+    rotationSpeed = 0.060; // Adjust rotation speed
+    let startX = 0;
+    let startY = 0;
+    let sensitivity = 1; // Adjust rotation speed sensitivity
+    let turning = false;    // Tracks if the turning finger is active
+    let decelerating = false;
+    let friction = 1; // Lower values slow down faster, higher values slow down slower
+    let decayRate = 1; // How much to decrease per frame
+
+    // Prevent page scrolling during touch interactions
+    document.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+    } , { passive: false });
+
+    // Handle touchstart events
+    document.addEventListener("touchstart", (e) => {
+      // If one finger is touching, use it for turning/thrust
+      if (e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        turning = true;
+        decelerating = false; // Stop deceleration when actively swiping
+      }
+    });
+
+    // Handle touchmove for continuous turning (using the first finger)
+    document.addEventListener("touchmove", (e) => {
+      if (turning && e.touches.length >= 1) {
+          // Use the first touch for turning
+          let currentX = e.touches[0].clientX;
+          let currentY = e.touches[0].clientY;
+          let swipeDistanceX = currentX - startX;
+          let swipeDistanceY = currentY - startY;
+
+          if (Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY)) {
+              if (swipeDistanceX > 0) {
+                  console.log("Swiping Right - Turn Ship Right");
+                  ship.turnLeft = false;
+                  ship.turnRight = true;
+                  ship.rotationSpeed = Math.min(swipeDistanceX * sensitivity, 3);
+              } else {
+                  console.log("Swiping Left - Turn Ship Left");
+                  ship.turnRight = false;
+                  ship.turnLeft = true;
+                  ship.rotationSpeed = Math.max(swipeDistanceX * sensitivity, -3);
+              }
+          } else {
+              if (swipeDistanceY > 0) {
+                  console.log("Swiping Down - Turn Ship Down");
+                  ship.turnLeft = false;
+                  ship.turnRight = true;
+                  ship.rotationSpeed = Math.min(swipeDistanceY * sensitivity, 3);
+              } else {
+                  console.log("Swiping Up - Turn Ship Up");
+                  ship.turnRight = false;
+                  ship.turnLeft = true;
+                  ship.rotationSpeed = Math.max(swipeDistanceY * sensitivity, -3);
+              }
+          }
+      }
+    });
+
+    // Smooth Deceleration Function
+    function slowDownRotation() {
+        if (Math.abs(ship.rotationSpeed) > 0.01) {
+            ship.rotationSpeed *= friction; // Apply friction
+            ship.rotationSpeed -= decayRate * Math.sign(ship.rotationSpeed); // Apply linear reduction
+            requestAnimationFrame(slowDownRotation); // Continue loop until nearly stopped
+        } else {
+            ship.rotationSpeed = 0; // Fully stop
+            ship.turnLeft = false;
+            ship.turnRight = false;
+        }
+    }
+
+    // When touches end, update turning state only if no turning finger remains
+    document.addEventListener("touchend", (e) => {
+        // If no fingers remain, stop turning
+        if (e.touches.length === 0) {
+            turning = false;
+            //ship.turnLeft = false;
+            //ship.turnRight = false;
+            //ship.rotationSpeed = 0;
+            decelerating = true;
+            slowDownRotation(); // Start the deceleration process
+        }
+    });
+    // 🚀 **Thrust Button Handling**
+    document.getElementById("thrustBtn").addEventListener("touchstart", () => {
+        ship.thrusting = true;
+        console.log("🚀 Thrusting!");
+    });
+
+    document.getElementById("thrustBtn").addEventListener("touchend", () => {
+        ship.thrusting = false;
+    });
+
+    let isShooting = false;
+    let burstCount = 0;
+    let burstInterval;
+    const maxBurstShots = 10; // Adjust max shots per burst
+    const gunMachineType = 100; // Adjust fire rate (100ms = 10 bullets/sec)
+
+  document.getElementById("shootBtn").addEventListener("touchstart", () => {
+      if (!isShooting) {
+          isShooting = true;
+          burstCount = 0; // Reset shot counter
+
+          // Start burst fire (like spacebar)
+          burstInterval = setInterval(() => {
+              if (burstCount < maxBurstShots) {
+                  ship.shoot(); // Fire a bullet
+                  burstCount++;
+              } else {
+                  clearInterval(burstInterval); // Stop firing after max shots
+              }
+          }, gunMachineType);
+      }
+  });
+
+  document.getElementById("shootBtn").addEventListener("touchend", () => {
+      isShooting = false;
+      clearInterval(burstInterval); // Stop shooting when button is released
+  });
+
+
+}
+
+
+  let touchStartY = 0;
+
+  document.addEventListener("touchstart", (e) => {
+      touchStartY = e.touches[0].clientY; // Capture starting Y position
+  });
+
+  ///swipe up to get to transition
+  let swipeUpTran = false;
+  if (swipeUpTran) {
+      document.addEventListener("touchend", (e) => {
+          let touchEndY = e.changedTouches[0].clientY;
+
+          if (touchStartY - touchEndY > 50) { // Detect swipe-up
+          console.log("📱 Swipe-Up Detected: Triggering Transition!");
+          levelTransitionActive = true;
+          levelTransitionStart = performance.now();
+          handleLevelTransition(2, 2500000, 90); // Example: Level 2, 2.5M score, 90% accuracy
+          }
+      });
+  };
+
+  //MOBILE STOP ZOOM
+  document.addEventListener('touchstart', function (event) {
+      if (event.touches.length > 1) {
+          event.preventDefault(); // Prevent multi-touch zoom
+      }
+  }, { passive: false });
+  //MOBILE STOP PINCH ZOOM
+  document.addEventListener('gesturestart', function (event) {
+      event.preventDefault(); // Prevent pinch zoom
+  });
+  document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+  });
+  document.addEventListener('gesturechange', function (e) {
+      e.preventDefault();
+  });
+  document.addEventListener('gestureend', function (e) {
+      e.preventDefault();
+  });
+  // Prevent double-tap zoom on buttons
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function (event) {
+      let now = new Date().getTime();
+      if (now - lastTouchEnd <= 300) {
+          event.preventDefault(); // Prevent double-tap zoom
+      }
+      lastTouchEnd = now;
+  }, { passive: false });
+
+/////////////////////////////////////////////////////////////
+//END PLAY ON MOBILE
+//////////////////////////////////////////////////////////////
+
+////////////////////////////////////
+// Collisions
+////////////////////////////////////
+function checkShipCollision() {
+  if (isExploding || isInvincible) return;
+
+  for (let i = asteroids.length - 1; i >= 0; i--) {
+    let a = asteroids[i];
+    let dx = ship.x - a.x;
+    let dy = ship.y - a.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+
+    // If shield is up, radius ~ 18; otherwise ~10
+    let shipRadius = shieldStrength > 0 ? 18 : 10;
+    if (dist < a.size + shipRadius) {
+      // Ship collision
+      if (shieldStrength > 0) {
+        shieldStrength = 0; // use shield
+        destroyAsteroid(a, i);
+
+          // Play explosion sound when ship his asteroid with shield
+        explosionSound.currentTime = 0;
+        explosionSound.play().catch(() => {});
+
+      } else {
+        explodeShip(); 
+        shipBoom.currentTime = 0;  // SHip DIES Restart from beginning if needed
+        shipBoom.play().catch(() => {});
+      }
+      break;
+    }
+  }
+}
+
+function destroyAsteroid(asteroid, index) {
+  if (asteroid.size >= 15 * sizeAdjust) {
+    // Large asteroid => +20 points, splits
+    //score += 2000 * scrAdj;
+    let newSize = asteroid.size / 2;
+    for (let i = 0; i < 2; i++) {
+      let newAngle = Math.random() * Math.PI * 2;
+      let newSpeed = asteroid.speed * (1.2 + Math.random() * 0.5);
+      asteroids.push(
+        new Asteroid(asteroid.x, asteroid.y, newSize, newSpeed, newAngle)
+      );
+
+    }
+  } else {
+    // Small asteroid => +50 points, debris
+    //score += 5000 * scrAdj;
+    for (let i = 0; i < 10; i++) {
+      debrisPieces.push(new Debris(asteroid.x, asteroid.y));
+    }
+  }
+  asteroids.splice(index, 1);
+
+  // NEXT LEVEL
+  // If no asteroids left, next level
+  //if (asteroids.length === 0) {
+  //  level++;
+  //  shieldStrength = 1; // refresh shield
+  //  beepInterval == 45;
+  //  spawnAsteroids(level);
+  //}
+}
+
+// BLOW UP SHIP
+function explodeShip() {
+  isExploding = true;
+  lives--;
+
+  // Number of ship fragments
+  const numFragments = 10;
+
+  // Create debris from the ship’s position
+  for (let i = 0; i < numFragments; i++) {
+    // Each fragment can be a small shape or “piece” 
+    // with random velocity, spin, and short lifespan.
+    const fragment = {
+      x: ship.x,
+      y: ship.y,
+      vx: (Math.random() - 0.5) * 6,   // random x velocity
+      vy: (Math.random() - 0.5) * 6,   // random y velocity
+      rotation: Math.random() * 0.2 - 0.1, // random spin
+      life: 60, // frames 
+      angle: Math.random() * Math.PI * 2,  // initial rotation
+      size: 6  // size of the fragment
+    };
+
+    // Add to debris array or a dedicated shipFragments array
+    shipFragments.push(fragment);
+  }
+
+  // Flash screen white very briefly
+  setTimeout(() => {
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, 50);
+
+  setTimeout(() => {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, 100);
+
+  // If we still have another life, respawn after 1s
+  if (lives > 0) {
+    setTimeout(() => {
+      isExploding = false;
+      shieldStrength = 0; // Reset shield strength 0 for original game
+      ship.x = canvas.width / 2;
+      ship.y = canvas.height / 2;
+      ship.vx = 0;
+      ship.vy = 0;
+
+      // ✅ Enable temporary invincibility after respawn
+      isInvincible = true;
+      setTimeout(() => {
+        isInvincible = false;  // Remove invincibility after 2 seconds
+      }, invincibilityDuration);
+
+    }, 1000);
+  } else {
+    // Trigger your game over logic
+    // Play game over sound
+    //triggerGameOver();
+    level = 99; // Right now level 99 is game over
+  }
+}
+
+// ============================== UPDATE AND DRAW ENEMY BULLETS FROM MAIN GAME LOOP
+function updateEnemyBullets() {
+  // Update and draw enemy bullets.
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    let bullet = enemyBullets[i];
+    bullet.move();
+    bullet.draw();
+    
+    // Remove bullet if off-screen or expired.
+    if (
+      bullet.x < 0 || bullet.x > canvas.width ||
+      bullet.y < 0 || bullet.y > canvas.height ||
+      bullet.life <= 0
+    ) {
+      enemyBullets.splice(i, 1);
+    }
+  }
+}
+
+// ============================== CHECK FOR UFO BULLETS HITTING SHIP CALLED FROM GAME LOOP
+function checkEnemyBulletCollisionsWithShip() {
+  // Check collisions for each enemy bullet with the ship.
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    let bullet = enemyBullets[i];
+    let dx = ship.x - bullet.x;
+    let dy = ship.y - bullet.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    // Adjust the collision radius as needed (here, 30).
+    if (dist < 20) {
+      enemyBullets.splice(i, 1);
+      explosionSound.currentTime = 0;
+      explosionSound.play().catch(() => {});
+      // Create explosion debris at the ship's location.
+      for (let j = 0; j < 10; j++) {
+        debrisPieces.push(new Debris(ship.x, ship.y));
+      }
+      // Handle ship damage.
+      explodeShip();
+    }
+  }
+}
+
+// ============================== UPDATE SHIP GAME LOOP
+// Update the Ship (movement and drawing).
+function updateShip() {
+  if (!isExploding) {
+    // Apply friction.
+    ship.vx *= 0.99;
+    ship.vy *= 0.99;
+    ship.move();
+    ship.draw();
+  }
+}
+
+// ============================================= UFO SPAWN AND UPDATE GAME LOOP
+// Update the UFO: spawn check, movement, drawing, shooting, and collision with ship and bullets.
+function updateUFO(levelTime) {
+  // UFO spawn check: if levelTime >= 15 seconds, start spawn interval if not already running.
+  if (levelTime >= 15 && ufoSpawnInterval === null) {
+    console.log("Starting UFO spawn check");
+    ufoSpawnInterval = setInterval(() => {
+      console.log("Checking UFO spawn... Current UFO:", ufo);
+      // 40% chance every 7 seconds.
+      if (ufo === null && Math.random() < 0.6) {
+        console.log("Spawning UFO!");
+        // Force main UFO spawn until at least two have appeared.
+        if (mainUFOSpawnCount < 2) {
+          ufo = new UFO("main");
+          mainUFOSpawnCount++;
+        } else {
+          // Once two main UFOs have spawned, spawn a small UFO 50% of the time.
+          if (Math.random() < 0.5) {
+            ufo = new UFO("small");
+          } else {
+            ufo = new UFO("main");
+            mainUFOSpawnCount++;
+          }
+        }
+        playUFOSound();
+      } else {
+        console.log("No UFO spawned this interval.");
+      }
+    }, 7000);
+  }
+
+  // If a UFO exists, update it.
+  if (ufo !== null) {
+    ufo.move();
+    ufo.draw();
+    ufo.shoot();
+
+    // Check collisions between ship bullets and UFO.
+    for (let i = ship.bullets.length - 1; i >= 0; i--) {
+      let bullet = ship.bullets[i];
+      let dx = ufo.x - bullet.x;
+      let dy = ufo.y - bullet.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 30) {  // Adjust collision radius as needed.
+        ship.bullets.splice(i, 1);
+        explosionSound.currentTime = 0;
+        explosionSound.play().catch(() => {});
+        // Increase the score based on UFO type.
+        if (ufo.type === "small") {
+          score += 1000;
+        } else {
+          score += 200;
+        }
+        for (let j = 0; j < 10; j++) {
+          debrisPieces.push(new Debris(ufo.x, ufo.y));
+        }
+        ufo = null;
+        stopUFOSound();
+        break;
+      }
+    }
+    
+    // Check ship collision with UFO.
+    if (ufo !== null) {
+      let dxShip = ufo.x - ship.x;
+      let dyShip = ufo.y - ship.y;
+      let distShip = Math.sqrt(dxShip * dxShip + dyShip * dyShip);
+      if (distShip < (10 + 10)) {
+        explosionSound.currentTime = 0;
+        explosionSound.play().catch(() => {});
+        for (let j = 0; j < 10; j++) {
+          debrisPieces.push(new Debris(ufo.x, ufo.y));
+        }
+        explodeShip();
+        ufo = null;
+        stopUFOSound();
+      }
+    }
+
+    // Remove UFO if it has moved off-screen.
+    if (ufo !== null && !ufo.active) {
+      ufo = null;
+      stopUFOSound();
+    }
+    
+    // Update enemy bullets and check for collisions.
+    updateEnemyBullets();
+    checkEnemyBulletCollisionsWithShip();
+  }
+}
+
+
+// ================================================== SHIP BULLETS GAME LOOP
+// Update ship bullets (move, draw, and remove off-screen/expired).
+function updateShipBullets() {
+  for (let i = ship.bullets.length - 1; i >= 0; i--) {
+    let bullet = ship.bullets[i];
+    bullet.move();
+    bullet.draw();
+    if (
+      bullet.x < 0 || bullet.x > canvas.width ||
+      bullet.y < 0 || bullet.y > canvas.height ||
+      bullet.life <= 0
+    ) {
+      ship.bullets.splice(i, 1);
+    }
+  }
+}
+
+// ================================================== UPDATE ASTEROIDS GAME LOOP
+// Update asteroids (movement, drawing, collisions with bullets and UFO).
+function updateAsteroids() {
+  for (let aIndex = asteroids.length - 1; aIndex >= 0; aIndex--) {
+    let asteroid = asteroids[aIndex];
+    asteroid.move();
+    asteroid.draw();
+
+    // Check for collision with UFO.
+    if (ufo !== null) {
+      let dxU = asteroid.x - ufo.x;
+      let dyU = asteroid.y - ufo.y;
+      let distU = Math.sqrt(dxU * dxU + dyU * dyU);
+      if (distU < asteroid.size + 20) {  // Adjust collision radius as needed.
+        explosionSound.currentTime = 0;
+        explosionSound.play().catch(() => {});
+        for (let j = 0; j < 10; j++) {
+          debrisPieces.push(new Debris(ufo.x, ufo.y));
+        }
+        ufo = null;
+        stopUFOSound();
+        asteroids.splice(aIndex, 1);
+        continue;
+      }
+    }
+
+    // Check bullet-asteroid collisions.
+    for (let bIndex = ship.bullets.length - 1; bIndex >= 0; bIndex--) {
+      let bullet = ship.bullets[bIndex];
+      let dx = asteroid.x - bullet.x;
+      let dy = asteroid.y - bullet.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < asteroid.size) {
+        ship.bullets.splice(bIndex, 1);
+        // Big asteroid collision logic.
+        if (asteroid.size >= 15 * sizeAdjust) {
+          explosionSound.currentTime = 0;
+          explosionSound.play().catch(() => {});
+          beepInterval -= 2;
+          score += 20;
+          bulletHits++;
+          for (let i = 0; i < 10; i++) {
+            debrisPieces.push(new Debris(asteroid.x, asteroid.y));
+          }
+          let newSize = asteroid.size / (2 * sizeAdjust);
+          for (let i = 0; i < 2; i++) {
+            let newAngle = Math.random() * Math.PI * 2;
+            let newSpeed = asteroid.speed * (1.2 + Math.random() * 0.5);
+            asteroids.push(
+              new Asteroid(asteroid.x, asteroid.y, newSize, newSpeed, newAngle)
+            );
+          }
+        } else {
+          // Small asteroid collision logic.
+          explosionSound.currentTime = 0;
+          explosionSound.play().catch(() => {});
+          beepInterval -= 2;
+          thumpInterval = Math.max(250, thumpInterval - 50);
+          score += 100;
+          bulletHits++;
+          for (let i = 0; i < 10; i++) {
+            debrisPieces.push(new Debris(asteroid.x, asteroid.y));
+          }
+        }
+        asteroids.splice(aIndex, 1);
+        break;
+      }
+    }
+  }
+}
+
+// ========================================CHECK FOR LEVEL TRANSITION GAME LOOP
+// Check for level transition. We only proceed if no asteroids remain and no active UFO.
+function checkLevelTransition() {
+  if (asteroids.length === 0 && !levelTransitionActive) {
+    if (ufo === null) {
+      levelTransitionActive = true;
+      levelTransitionStart = performance.now();
+      stopGameLoop();
+      setTimeout(() => {
+        level++;
+        console.log(`🚀 Transitioning to Level ${level}`);
+        handleLevelTransition(level, score, accuracy);
+      }, 1200);
+    } else {
+      console.log("All asteroids cleared, but UFO still active. Waiting for UFO to be removed.");
+    }
+  }
+}
+
+// ========================================DEBRIS GAME LOOP
+// Update debris pieces.
+function updateDebris() {
+  for (let i = debrisPieces.length - 1; i >= 0; i--) {
+    let d = debrisPieces[i];
+    d.move();
+    d.draw();
+    if (d.life <= 0) {
+      debrisPieces.splice(i, 1);
+    }
+  }
+}
+//=========================================== Game Over or WIN  GAME
+// Win Game
+function WinGame() {
+    winGame = true;
+    allowScroll = true;
+    // Play win music
+    winmusic.currentTime = 0;
+    winmusic.play().catch(() => {});
+    trumpSoundGolden.currentTime = 0;
+    trumpSoundGolden.play().catch(() => {});
+    level = 98;
+    levelTransitionActive = true;
+    levelTransitionStart = performance.now(); // Mark transition start
+    stopGameLoop();
+    handleLevelTransition(level, score,  accuracy);
+}
+// Game Over
+function triggerGameOver() {
+    // Play game over sound 
+    gameOver1.currentTime = 0;
+    gameOver1.play().catch(() => {});
+    //Play Trump Your Fired
+    trumpSoundYourFired.currentTime = 0;
+    trumpSoundYourFired.play().catch(() => {});
+    level = 99;
+    levelTransitionActive = true;
+    levelTransitionStart = performance.now(); // Mark transition start
+    stopGameLoop();
+    handleLevelTransition(level, score,  accuracy);
+  //gameOverActive = true;
+  //gameOverStart = performance.now();
+}
+
+// Function to start the next level
+function startNewLevel(level) {
+    levelTransitionHandled = false;  // ✅ Reset transition flag
+    levelTransitionActive = false;   // ✅ Reset active flag
+    console.log(`Starting Level ${level}...`);
+    shieldStrength = 0;
+    beepInterval =45;
+    thumpInterval = 1000; // Start slow (1 sec per beat)
+    asteroids = []; // Clear all asteroids
+    // ✅ Set ship color for this level
+    shipColor = shipLevels[level]?.shipColor || "white"; 
+    //shipImg.src = shipLevels[level].shipImg; // ✅ Set ship image for this level
+    //spawnBlackHoles(level); // not for original game
+    //getRandomAsteroidName();
+    spawnAsteroids(level);
+    // ✅ Ensure game loop restarts
+    if (!gameLoopID) {
+        console.log("🔄 Restarting Game Loop...");
+        gameLoopID = requestAnimationFrame(update);
+    }
+}
+  // ======================================================== DATABASE CALLS
+// === GET HIGH SCORES FROM DATABASE
+function getHighScore() {
+  console.log("../getHighScore function");
+  fetch("../get_highscores.php")
+    .then(response => response.json())
+    .then(scores => {
+      highScores = scores; // Store scores in the variable
+      
+      // Optional: sort scores in descending order if not already sorted.
+      highScores.sort((a, b) => b.score - a.score);
+      
+      // Update topScore with the highest score.
+      if (highScores.length > 0) {
+        topScore = highScores[0].score;
+        // If there are at least 20 scores, set topScore20 to the 20th highest score,
+        // otherwise, use a default value.
+        if (highScores.length >= 20) {
+          topScore20 = highScores[19].score; // 20th score (index 19)
+        } else {
+          topScore20 = 123;
+        }
+      }
+      console.log("Fetched High Scores:", highScores);
+    })
+    .catch(error => console.error("Error fetching scores:", error));
+}
+
+
+  //////////////////////////////////////////////
+  // === SAVE HIGH SCORE TO DATABASE USING PHP
+  function saveHighScore(playerName, score) {
+    console.log(" Save High Score via ../get_highscore function" + score); // Debugging output
+    fetch("../get_highscores.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ playerName: playerName, score: score, deviceType: deviceType, gameID: gameID, gameVersion: gameVersion})
+    })
+    .then(response => response.json())
+    .then(data => console.log("High score saved:", data))
+    .catch(error => console.error("Error saving score:", error));
+    //setTimeout(() => {
+      //window.location.href = "index.html"; // Redirect to main asteroids page
+    //}, 6000); // Redirects after 3 seconds
+  }
+  //=======================END DATABASE CALLS=========================
+
+// DRAW ICON FOR LIVES LEFT
+//UNDER SCOREBUG
+function drawLivesIcons(x, y, lives) {
+    let iconSize = 30 * (sizeAdjust/1.5); // Adjust size of the life icons
+    let spacing = 5;   // Space between icons
+
+    for (let i = 0; i < lives; i++) {
+        ctx.drawImage(lifeIcon, x + (i * (iconSize + spacing)), y, iconSize, iconSize);
+    }
+}
+
+
+// Global variable to store the current transition image
+function debugCanvasSize() {
+  ctx.save(); // Save current canvas state
+
+  // Background box for visibility
+  ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; // Semi-transparent black
+  ctx.fillRect(10, 10, 260, 60);
+
+  // Debug text
+  ctx.fillStyle = "yellow";
+  ctx.font = "16px Arial";
+  ctx.fillText(`Canvas: ${canvas.width} x ${canvas.height}`, 20, 35);
+  ctx.fillText(`Window: ${window.innerWidth} x ${window.innerHeight}`, 20, 55);
+
+  ctx.restore(); // Restore canvas state
+}
+
+let opacity = 0;
+let fadingIn = true;
+//let levelTransitionActive = true;
+let borderAnimationOffset = 0;
+
+//=====================================================NEXT LEVEL TRANSITION
+// ** Handles transitions between levele
+// ** for original game just set originalGame = 1
+// ** otherwise add images and messages to each level
+
+function handleLevelTransition(level, score, accuracy) {
+    if (!levelTransitionActive) return;
+    console.log("Level function Transition Active: " + level);
+    //stopGameLoop(); // Stop the game loop during transition
+
+    const elapsed = performance.now() - levelTransitionStart;
+
+// =========================SET LEVEL FOR ORIGINAL GAME
+// ** Override level transition to make level like original game
+// ** originalGame is set at the top next to global variables. just make 0 to show full level transitions
+//
+  stopGameLoop();
+    if (originalGame === 1) {
+      if (elapsed > 1) { // ✅ X-second delay before next level
+
+        levelTransitionActive = false;
+        let levelStartTime = Date.now();
+        // CHECK IF WIN GAME OR GAME OVER OR TRANSITION TO NEXT LEVEL
+        if (level === 99) { // GAME OVER
+          console.log("Game Over! Level - " + level);
+          
+          // Play game over sound.
+          gameOver1.currentTime = 0;
+          gameOver1.play().catch(() => {});
+
+          // Stop the game loop.
+          stopGameLoop();
+          
+          // Clear the canvas and draw "GAME OVER" in the center using the Hyperspace font.
+          ctx.save();
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "white";  // Choose a color for the text.
+          ctx.font = "72px 'Hyperspace'"; // Use the Hyperspace font at 72px size.
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("ASTEROIDS", canvas.width / 2, canvas.height / 2 - 200);
+          ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 + 200);
+          ctx.restore();
+          
+          if (saveScore === 0) {
+            saveScore = 1;
+            if (score > topScore20) {
+              highScoreTrigger = true;
+            }
+            if (highScoreTrigger) { // look at top 20 high score to enter name
+              setTimeout(() => {
+                if (score > topScore20) { // ✅ Only show if score is high enough
+                  console.log("Showing High Score Popup..." + score);
+                  document.getElementById("highScorePopup").style.display = "flex";
+                  //saveHighScore(playerName, score); // ✅ Now explicitly passing `score`
+                  gamePaused = true; // ✅ Pause game input while popup is open
+                } else {
+                console.log("Score not high enough, popup will not show.");
+                }
+              }, 2000); // Delay before popup appears
+            }
+          }
+
+          // Redirect to the main page after XX seconds.
+          setTimeout(() => {
+            //location.reload();
+            window.location.href = "index.html"; // Redirect to main asteroids page
+          }, 20000);
+        } else {
+          // ==========================GO TO NEXT LEVEL
+          setTimeout(() => {
+              startNewLevel(level);
+              console.log("Level function Transition Timer: " + level);
+              levelTransitionActive = false;
+          }, 2000); // ✅ X-second delay before next level starts
+        }
+      }
+    } else {
+    
+//=========================END SET LEVEL FOR ORIGINAL GAME
+
+    // Ensure the level exists
+    if (!levelsX[level]) {
+        console.error("Level not found!");
+        return;
+    }
+
+    let imagelevel = new Image();
+    imagelevel.src = levelsX[level].Image;
+    console.log("Image Level: " + imagelevel.src);
+    let levelText = levelsX[level].text;
+    let imageWidth;
+
+    // ✅ Wait until the image is fully loaded before drawing
+    imagelevel.onload = function () {
+      console.log("✅ Image Loaded Successfully: " + imagelevel.src);
+      console.log("Start Drawing Text and Image for Transition Page" + level);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#111111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+      // ctx.globalAlpha = opacity;
+      if (isMobile()) {
+          imgWidth = Math.min(canvas.width * .9); // Adjust image size for mobile
+      } else {
+          imgWidth = Math.min(canvas.width * .3);
+      }
+      //const aspectRatio = imagelevel.naturalWidth / imagelevel.naturalHeight;
+      const imgHeight = imgWidth;
+      const imgX = (canvas.width - imgWidth) / 2; // Centers horizontally
+      const imgY = Math.min(canvas.height * 0.2, 20);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(imgX, imgY, imgWidth, imgHeight, 20); // ✅ Match the actual image size
+      ctx.clip();
+      ctx.drawImage(imagelevel, imgX, imgY, imgWidth, imgHeight); // ✅ No unnecessary scaling
+      ctx.restore();
+      
+      // Subtle Animated Border
+      ctx.save();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = `hsl(${(borderAnimationOffset % 360) + 200}, 80%, 60%)`;
+      ctx.beginPath();
+      ctx.roundRect(imgX - 2, imgY - 2, (imgWidth) + 4, (imgHeight) + 4, 20);
+      ctx.stroke();
+      ctx.restore();
+      borderAnimationOffset += 1;
+
+      // Display level complete text
+      console.log("Writing LEVEL COMPLETE CODE");
+      let levelmsg;
+      if (level === 99) {
+        levelmsg = "YOU'RE FIRED!";
+      } else if (level === 98) {
+        levelmsg = "YOU WIN!";
+      } else {
+        levelmsg = "LEVEL " + (level - 1) + " COMPLETE!";
+      }
+      ctx.fillStyle = "#FFD700";
+      ctx.textAlign = "center";
+      if (!isMobile()) {
+          ctx.font = `${Math.min(canvas.width * 0.04)}px Arial`; // Adjust font size for computer
+          ctx.fillText(levelmsg, canvas.width / 2, imgY + imgHeight + 40);
+      } else {
+          ctx.font = `${Math.min(canvas.width * 0.075)}px Arial`; // Adjust font size for mobile
+          ctx.fillText(levelmsg, canvas.width / 2, imgY + imgHeight + 100);
+      }
+
+
+    
+      // DISPLAY LEVEL MESSAGE
+      if (!isMobile()) {
+        ctx.font = `${Math.min(canvas.width * 0.02)}px Arial`; // Adjust font size for computer
+        ctx.fillStyle = "white";
+        // ✅ Handle Manual Line Breaks
+        let textLines = levelsX[level].text.split("\n");  // Split text by \n
+        textLines.forEach((line, index) => {
+          ctx.fillText(line, canvas.width / 2, imgY + imgHeight + 80 + (index * 30));
+        });
+      } else {
+        ctx.font = `${Math.min(canvas.width * 0.06)}px Arial`; // Adjust font size for mobile
+        ctx.fillStyle = "white";
+        // ✅ Handle Manual Line Breaks
+        let textLines = levelsX[level].text.split("\n");  // Split text by \n
+        textLines.forEach((line, index) => {
+          ctx.fillText(line, canvas.width / 2, imgY + imgHeight + 190 + (index * 50));
+        });
+      }
+
+    
+      // Display score and accuracy
+      if (!isMobile()) {
+          ctx.font = `${Math.min(canvas.width * 0.04)}px monospace`; // Adjust font size for computer
+          ctx.fillText(`Money Saved`, canvas.width / 2, imgY + imgHeight + 150);
+          ctx.fillText("$" + (score * scrMultiplier).toLocaleString(), canvas.width / 2, imgY + imgHeight + 200);    
+      } else {
+          ctx.font = `${Math.min(canvas.width * 0.06)}px monospace`; // Adjust font size for mobile
+          ctx.fillText(`Money Saved`, canvas.width / 2, imgY + imgHeight + 320);
+          ctx.fillText("$" + (score * scrMultiplier).toLocaleString(), canvas.width / 2, imgY + imgHeight + 380);    
+      }
+      ctx.globalAlpha = 1;
+
+      // CHECK IF WIN GAME OR GAME OVER OR TRANSITION TO NEXT LEVEL
+      if (level === 99) { // GAME OVER
+        console.log("Game Over! Level - " + level);
+            // Play game over sound 
+            gameOver1.currentTime = 0;
+            gameOver1.play().catch(() => {});
+            //Play Trump Your Fired
+            trumpSoundYourFired.currentTime = 0;
+            trumpSoundYourFired.play().catch(() => {});
+            stopGameLoop();
+            setTimeout(() => {
+          window.location.href = "demaroids.html#toppatriots?nocache=123"; // Redirect to main page
+        }, 18000); // Redirects after 3 seconds
+      
+      } else if (level === 98) { // CHECK WIN GAME
+          console.log("Win Game Level - " + level);
+          winmusic.currentTime = 0;
+          winmusic.play().catch(() => {});
+          trumpSoundGolden.currentTime = 0;
+          trumpSoundGolden.play().catch(() => {});
+          stopGameLoop();
+          if (saveScore === 0) {
+            saveScore = 1;
+            if (score > topScore20) {
+              highScoreTrigger = true;
+            }
+            if (highScoreTrigger) { // look at top 20 high score to enter name
+              setTimeout(() => {
+                if (score > topScore20) { // ✅ Only show if score is high enough
+                  console.log("Showing High Score Popup..." + score);
+                  document.getElementById("highScorePopup").style.display = "flex";
+                  //saveHighScore(playerName, score); // ✅ Now explicitly passing `score`
+                  gamePaused = true; // ✅ Pause game input while popup is open
+                } else {
+                console.log("Score not high enough, popup will not show.");
+                }
+              }, 2000); // Delay before popup appears
+            }
+        }
+      } else { // GO TO NEXT LEVEL
+        stopGameLoop();
+        if (elapsed > 1) { // ✅ 6-second delay before next level
+
+          levelTransitionActive = false;
+
+          // ✅ Get the audio file from `levelsX`
+          let audioFile = levelsX[level]?.audioFile || null; // ✅ Default to null if no audio
+
+          if (audioFile) {
+              let audio = new Audio(audioFile);
+              audio.play().catch(error => console.log("Audio play failed:", error));
+
+              // ✅ Wait until audio finishes before starting the next level
+              audio.onended = () => {
+                  startNewLevel(level); // ✅ Start level AFTER audio finishes
+                  console.log("Level function Transition Timer: " + level);
+              };
+          } else {
+            // ✅ No audio? Wait 6 seconds before starting the next level
+            setTimeout(() => {
+                startNewLevel(level);
+                console.log("Level function Transition Timer: " + level);
+                levelTransitionActive = false;
+            }, 5000); // ✅ 6-second delay before next level starts
+          }
+        };
+        //return;
+      }
+
+    }
+  }
+    //stopGameLoop();
+    //debugCanvasSize();
+    console.log("Level function Transition END: " + level);
+    //requestAnimationFrame(() => handleLevelTransition(level, score, accuracy));
+}
+
+
+function submitHighScore() {
+    let playerName = document.getElementById("playerName").value.trim().toUpperCase();
+
+    if (!playerName) {
+        alert("Please enter your name!");
+        return;
+    }
+
+    console.log("Saving High Score:", playerName, score); 
+
+    saveHighScore(playerName, score); // ✅ Save only after user inputs name
+    document.getElementById("highScorePopup").style.display = "none"; // ✅ Hide popup
+    gamePaused = false; // ✅ Resume game logic
+
+    setTimeout(() => {
+        window.location.href = "index.html"; // ✅ Restart game
+    }, 2000);
+}
+
+function animateTransition() {
+  if (fadingIn) {
+    opacity += 0.02;
+      if (opacity >= 1) {
+        opacity = 1;
+        fadingIn = false;
+      }
+    }
+  drawTransition();
+  if (levelTransitionActive) {
+    requestAnimationFrame(animateTransition);
+  }
+}
+
+// Function to stop the game loop
+function stopGameLoop() {
+  levelTransitionActive = true;
+  cancelAnimationFrame(gameLoopID);
+    gameLoopID = null; // Reset loop ID
+    console.log("Game loop paused.");
+}
+
+// ============================ADD A NEW SHIP AT A CERTAIN SCORE
+// ** extra life is defined in the beginning of the game
+let lastShipAwardedAt = 0;
+function awardExtraLife() {
+    const currentScore = score * scrMultiplier;
+    const currentThreshold = Math.floor(currentScore / addShipScore) * addShipScore;
+
+    if (currentScore >= addShipScore && currentThreshold > lastShipAwardedAt) {
+        lives += 1;
+        lastShipAwardedAt = currentThreshold;
+        console.log(`Extra life awarded at ${currentThreshold} points! Lives: ${lives}`);
+
+        // Optional: Play a sound (if you have a sound system)
+        // playSound('extraLifeSound');
+
+        // Optional: Show a visual effect (e.g., flash the screen)
+        // You could add a temporary overlay or animation here
+    }
+}
+
+// ==================================================== DRAW THE SCOREBUG
+// ** 2 scorebugs here. 1 from demaroids and 1 for origianl asteroids
+// ** just add/or remove 'old' to swap
+// ======================================================================
+
+function drawScoreBug() {
+    ctx.save(); // Save current canvas state
+
+    // Set up vector-style font and glow
+    ctx.font = "bold 24px 'Hyperspace', monospace";
+    //ctx.font = "bold 24px 'Press Start 2P', monospace"; // Consistent size for retro look
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#FFFFFF"; // White text, like original Asteroids
+    ctx.shadowColor = "#00FFFF"; // Cyan glow for vector effect
+    ctx.shadowBlur = 8; // Glow intensity
+
+    // Player Score (Left)
+    const playerScoreText = (score * scrMultiplier).toLocaleString(undefined, { useGrouping: false}).padStart(2, "0");
+    ctx.fillText(playerScoreText, 180, 20); // Top-left position
+
+    // High Score (Center)
+    ctx.font = "bold 18px 'Hyperspace', monospace";
+    ctx.textAlign = "center";
+    const highScoreText = (topScore * scrMultiplier).toLocaleString().padStart(2, "0");
+    //ctx.fillText("HIGH SCORE", canvas.width / 2, 20); // Label above
+    ctx.fillText(highScoreText, canvas.width / 2, 20); // Score below
+
+    // Lives (Under Player Score)
+    drawLivesIcons(130, 40, lives); // Positioned below the score
+
+  // ✅ DEBUG TOGGLE (Press "D" to Show Variables for Troubleshooting)
+  if (showDebug) {
+        ctx.font = "12px courier";
+        ctx.fillStyle = "yellow";
+        ctx.fillText("Variables Debug", 20, 180);
+        ctx.fillText("FPS: " + detectedRefreshRate, 20, 200);
+        ctx.fillText("Adjusted Speed: " + adjustedSpeed.toFixed(2), 20, 210);
+        ctx.fillText("Beep Interval: " + beepInterval, 20, 220);
+        ctx.fillText("Beep Timer: " + beepTimer, 20, 230);
+        ctx.fillText("Game Over Active: " + gameOverActive, 20, 240);
+        ctx.fillText("Game Over Start: " + gameOverStart, 20, 250);
+        ctx.fillText("Game Over End: " + gameOverEnd, 20, 260);
+        ctx.fillText("Ship: " + ship.x.toFixed(2) + ", " + ship.y.toFixed(2), 20, 270);
+        //ctx.fillText("Delta Time: " + dt.toFixed(3), 20, 280);
+        ctx.fillText("Bullet Counter: " + bulletCounterS, 20, 290);
+        ctx.fillText("Bullet Hits: " + bulletHits, 20, 300);
+        ctx.fillText("Accuracy: " + accuracy.toFixed(2) + "%", 20, 310);
+        ctx.fillText("Score Total: " + (score * (accuracy / 100)).toFixed(2), 20, 320);
+        ctx.fillText("Mobile: " + mobile, 20, 330);
+        ctx.fillText("Landscape: " + landscape, 20, 340);
+        ctx.fillText("Browser: " + browserName, 20, 350);
+        ctx.fillText("Device: " + deviceType, 20, 360);
+        ctx.fillText("OS: " + operatingSystem, 20, 370);
+        ctx.fillText("Top 20th Score: " + topScore20, 20, 380);
+        ctx.fillText("Adjust Size: " + sizeAdjust, 20, 390);
+        ctx.fillText("Canvas: " + canvas.width +"-" + canvas.height, 20, 400);
+    }
+
+    ctx.restore(); // Restore canvas state
+}
+
+function drawLivesIcons(x, y, numLives) {
+    ctx.save();
+    ctx.shadowColor = "#00FFFF"; // Cyan glow
+    ctx.shadowBlur = 8;
+    ctx.strokeStyle = "#FFFFFF"; // White lines
+    ctx.lineWidth = 1;
+
+    const sizeAdjust = 0.3; // Scale down from your ship's 0.6
+    for (let i = 0; i < numLives; i++) {
+        ctx.save(); // Save state for each icon
+        const baseX = x + i * 18; // Horizontal spacing
+        ctx.translate(baseX, y); // Move to position
+        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counterclockwise (tip up)
+
+        // Draw ship shape
+        ctx.beginPath();
+        ctx.moveTo(56 * sizeAdjustShip, 0); // Tip (now pointing up after rotation)
+        ctx.lineTo(-40 * sizeAdjustShip, -32 * sizeAdjustShip);
+        ctx.lineTo(-24 * sizeAdjustShip, -16 * sizeAdjustShip);
+        ctx.lineTo(-24 * sizeAdjustShip, 16 * sizeAdjustShip);
+        ctx.lineTo(-40 * sizeAdjustShip, 32 * sizeAdjustShip);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.restore(); // Restore state for next icon
+    }
+
+    // ✅ 80s Retro Footer
+    ctx.font = "Hyperspace";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+
+    //ctx.fillText(rotationSpeed, 20, 450);
+    ctx.fillText('1979 Atari Inc', canvas.width/2-20, canvas.height-35);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ctx.fontsize = "9px";
+    ctx.fillText(gameVersion, 30, canvas.height - 10);  
+    ctx.fillText(gamedevloper, canvas.width/2-20, canvas.height-10);
+    ctx.fillText('Level' + level , canvas.width/2+200, canvas.height-10);
+    ctx.restore(); // Restore canvas state
+
+
+      ctx.shadowBlur = 0; // Reset glow
+      ctx.shadowColor = "transparent";
+      ctx.restore();
+  }
+
+// ===================================== DRAW THE SCOREBUG
+// ** OLD Scorebug from Demaroids
+// ** may use in SuperAsteroids
+// ** just remove the 'old' to call this scorebug
+function drawScoreBugold() {
+  // Clear previous UI
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save(); // Save current canvas state
+
+  // ✅ 80s Arcade Style - Pixel Font
+  if (isMobile()) {
+      ctx.font = "bold 30px 'Press Start 2P', monospace"; // Retro arcade font
+  } else {
+      ctx.font = "bold 18px 'Press Start 2P', monospace"; // Retro arcade font
+  }
+  ctx.textAlign = "left";
+    
+  // ✅ Neon Glow Effect
+  ctx.shadowColor = "cyan"; // Classic neon blue glow
+  ctx.shadowBlur = 8;
+
+  // Draw HUD background box
+  ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; // Semi-transparent black background
+  ctx.fillRect(10, 10, 260, 180); // Adjust width & height based on text size
+
+  // ✅ STATS CALCULATIONS
+  accuracy = 100 * (bulletHits / bulletCounterS);
+    
+  // Default top score if none exists
+  if (topScore < 2) {
+      topScore = 1; // Set as default high score for development off server
+  }
+
+  // ✅ Draw Stats with 80s Colors
+  ctx.fillStyle = "yellow"; // High score in yellow
+  ctx.fillText("HIGH SCORE: $" + (topScore * scrMultiplier).toLocaleString(), 20, 30);
+
+  ctx.fillStyle = "cyan"; // Current score in cyan
+  ctx.fillText("SAVINGS: $" + (score * scrMultiplier).toLocaleString(), 20, 60);
+
+  ctx.fillStyle = "lime"; // Shield in green
+  ctx.fillText("SHIELD: " + shieldStrength, 20, 90);
+
+  ctx.fillStyle = "magenta"; // Level in purple
+  ctx.fillText("LEVEL: " + level, 20, 120);
+
+  // ✅ Draw Lives as Icons (Instead of Numbers)
+  drawLivesIcons(20, 150, lives);
+
+  // ✅ DEBUG TOGGLE (Press "D" to Show Variables for Troubleshooting)
+    if (showDebug) {
+        ctx.font = "12px courier";
+        ctx.fillStyle = "yellow";
+        ctx.fillText("Variables Debug", 20, 180);
+        ctx.fillText("FPS: " + detectedRefreshRate, 20, 200);
+        ctx.fillText("Adjusted Speed: " + adjustedSpeed.toFixed(2), 20, 210);
+        ctx.fillText("Beep Interval: " + beepInterval, 20, 220);
+        ctx.fillText("Beep Timer: " + beepTimer, 20, 230);
+        ctx.fillText("Game Over Active: " + gameOverActive, 20, 240);
+        ctx.fillText("Game Over Start: " + gameOverStart, 20, 250);
+        ctx.fillText("Game Over End: " + gameOverEnd, 20, 260);
+        ctx.fillText("Ship: " + ship.x.toFixed(2) + ", " + ship.y.toFixed(2), 20, 270);
+        //ctx.fillText("Delta Time: " + dt.toFixed(3), 20, 280);
+        ctx.fillText("Bullet Counter: " + bulletCounterS, 20, 290);
+        ctx.fillText("Bullet Hits: " + bulletHits, 20, 300);
+        ctx.fillText("Accuracy: " + accuracy.toFixed(2) + "%", 20, 310);
+        ctx.fillText("Score Total: " + (score * (accuracy / 100)).toFixed(2), 20, 320);
+        ctx.fillText("Mobile: " + mobile, 20, 330);
+        ctx.fillText("Landscape: " + landscape, 20, 340);
+        ctx.fillText("Browser: " + browserName, 20, 350);
+        ctx.fillText("Device: " + deviceType, 20, 360);
+        ctx.fillText("OS: " + operatingSystem, 20, 370);
+        ctx.fillText("Top 20th Score: " + topScore20, 20, 380);
+        ctx.fillText("Adjust Size: " + sizeAdjust, 20, 390);
+        ctx.fillText("Canvas: " + canvas.width +"-" + canvas.height, 20, 400);
+    }
+
+  // ✅ 80s Retro Footer
+  ctx.font = "24px monospace";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+  ctx.fillText(gameVersion, 20, canvas.height - 20);  
+  //ctx.fillText(rotationSpeed, 20, 450);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+  ctx.fillText(gamedevloper, canvas.width/2-20, canvas.height-20);
+  ctx.restore(); // Restore canvas state
+}
+
+// ============================================================ GAME SOUND 
+///////////////////////////////////////////////////////////////////////////
+// ***************************************SOUNDTRACK THUMP MUSIC USING SEQ
+//const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let thumpInterval = 1000; // Start slow (1 sec per beat)
+let lastThumpTime = 0; // Tracks last time the thump played
+let oscfreq = 40; // Initial frequency of the thump oscillator
+let isBeatOne = true; // Toggle for alternating frequencies
+function playThump() {
+    if (audioCtx.state === "suspended") {
+        audioCtx.resume(); // Ensure AudioContext is active
+    }
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter(); // 🔥 Low-pass filter to dull the sound
+
+    let frequency = isBeatOne ? 80 : 60; // ✅ Alternate between 60Hz and 75Hz
+    isBeatOne = !isBeatOne; // 🔄 Flip the toggle for next beat
+
+    osc.type = "square"; // ✅ Square wave with filtering
+    osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+    // 🔥 LOW-PASS FILTER (Makes the wave duller)
+    filter.type = "lowpass"; 
+    filter.frequency.setValueAtTime(250, audioCtx.currentTime); // 🔥 Cut off frequencies above 200Hz (adjustable)
+
+    gainNode.gain.setValueAtTime(0.8, audioCtx.currentTime); // ✅ Reduce volume slightly for a softer effect
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25); // Fast fade-out
+
+    osc.connect(filter); // 🔥 Send oscillator through the filter
+    filter.connect(gainNode); // 🔥 Then send filtered sound to volume control
+    gainNode.connect(audioCtx.destination); // 🔥 Finally, send it to speakers
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25); // Short burst, no lingering sound
+
+    // 🔥 Speed up the heartbeat (min limit: 250ms per cycle)
+    //thumpInterval = Math.max(250, thumpInterval - 20);
+}
+// ✅ Start the game & thump sound only after user interaction (fixes browser autoplay restrictions)
+document.addEventListener("click", () => {
+    if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+    }
+}, { once: true }); // ✅ This makes sure the event only runs once
+
+// ======================================== UFO SOUND
+let ufoAudioCtx;
+let ufoMainOsc, ufoVibratoOsc, ufoVibratoGain, ufoGainNode;
+
+function playUFOSound() {
+  // Create an AudioContext (or reuse one if you want).
+  ufoAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  
+  // Set default values for main oscillator frequency and vibrato frequency.
+  let baseFreq = 400;
+  let vibratoFreq = 5;
+  
+  // If the active UFO exists and is small, adjust the sound parameters.
+  if (ufo && ufo.type === "small") {
+    baseFreq = 1000;    // Higher pitched sound.
+    vibratoFreq = 10;   // Faster LFO for vibrato.
+  }
+  
+  // Create the main oscillator.
+  ufoMainOsc = ufoAudioCtx.createOscillator();
+  ufoMainOsc.frequency.setValueAtTime(baseFreq, ufoAudioCtx.currentTime);
+  
+  // Create a low-frequency oscillator for vibrato.
+  ufoVibratoOsc = ufoAudioCtx.createOscillator();
+  ufoVibratoOsc.frequency.setValueAtTime(vibratoFreq, ufoAudioCtx.currentTime);
+  
+  // Create a gain node to control vibrato depth.
+  ufoVibratoGain = ufoAudioCtx.createGain();
+  ufoVibratoGain.gain.setValueAtTime(20, ufoAudioCtx.currentTime); // Vibrato depth remains 20 Hz (adjust if desired)
+  
+  // Connect the vibrato oscillator chain to modulate the main oscillator's frequency.
+  ufoVibratoOsc.connect(ufoVibratoGain);
+  ufoVibratoGain.connect(ufoMainOsc.frequency);
+  
+  // Create a gain node for the overall volume.
+  ufoGainNode = ufoAudioCtx.createGain();
+  ufoGainNode.gain.setValueAtTime(0.5, ufoAudioCtx.currentTime);
+  
+  // Connect the main oscillator to the output.
+  ufoMainOsc.connect(ufoGainNode);
+  ufoGainNode.connect(ufoAudioCtx.destination);
+  
+  // Start both oscillators.
+  ufoMainOsc.start();
+  ufoVibratoOsc.start();
+}
+
+
+function stopUFOSound() {
+  if (ufoMainOsc) {
+    ufoMainOsc.stop();
+    ufoVibratoOsc.stop();
+    // Disconnect nodes.
+    ufoMainOsc.disconnect();
+    ufoVibratoOsc.disconnect();
+    ufoVibratoGain.disconnect();
+    ufoGainNode.disconnect();
+  }
+  if (ufoAudioCtx) {
+    ufoAudioCtx.close();
+  }
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//     ========================================================== Main Game Loop
+/////////////////////////////////////////////////////////////////////////////////
+
+let gameLoopID;
+function update() {
+  if (measuring) return; // **Prevent updates before measuring FPS**
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  //Time since last frame
+  const now = performance.now();
+  const dt = (now - lastTime) / 1000; // Convert to seconds
+  lastTime = now;
+
+  let levelTime = (Date.now() - levelStartTime) / 1000;
+
+  // APPLY BLACK HOLE GRAVITY
+  if (blackholeX === true) {
+    blackHoles.forEach(bh => {
+    bh.applyGravity([ship]);
+    bh.applyGravity(asteroids);
+  });
+   // blackHole.applyGravity([ship]); // Pull the ship
+   // blackHole.applyGravity(asteroids);
+    //blackHole.applyGravity(debrisPieces);
+    //blackHole.applyGravity(ship); // ✅ Apply gravity to ship);
+  }
+
+  ////////////////////////////////
+  ///GAME SOUNDTRACK - OLD SAOUNDTRACK probably just keep it around
+  ///If Game running play soundtrack
+  //if (!gameOverActive) {
+  //  if (beepInterval < 6) {
+  //     beepInterval = 6;
+  //  }
+  //  if (beepTimer > beepInterval) {
+  //     beepSound.currentTime = 0;
+  //    beepSound.play().catch(() => {});
+  //    beepTimer = 0;
+  //  } else { 
+  //     beepTimer++;
+  //  }
+  // }
+
+  // ✅ Only play the thump if enough time has passed
+  if (now - lastThumpTime > thumpInterval) {
+      playThump();
+      lastThumpTime = now;
+  }
+  startScreenMusic.pause();
+  // Draw black hole
+  // Can be 1 or multiple blackholes
+  if (blackholeX === true) {
+    blackHoles.forEach(bh => bh.draw(ctx));
+  }
+
+  updateShip(); // ✅ Update ship position and check for collisions 
+  drawScoreBug(); // ✅ Now the score bug is drawn efficiently
+  awardExtraLife(); // ✅ Check for extra life award
+  updateUFO(levelTime); // ✅ Update UFO position and check for collisions
+  let scoreC = 0;
+  updateShipBullets(); // ✅ Update ship bullets and check for collisions
+  updateAsteroids(); // ✅ Update asteroids and check for collisions
+  checkLevelTransition(); // ✅ Check if level transition is needed
+
+  
+
+
+  updateDebris(); // ✅ Update debris pieces and check for collisions
+
+  // Check ship collisions
+  if (!isExploding) {
+    checkShipCollision();
+  }
+  if (level === 99) {
+    levelTransitionActive = true;
+        levelTransitionStart = performance.now(); // Mark transition start
+        stopGameLoop();
+        setTimeout(() => {
+          console.log(`🚀 Transitioning to Level ${level}`);
+          handleLevelTransition(level, score, accuracy);
+        }, 1000); // ✅ 1-second delay (adjust as needed)
+  }
+
+// Move and draw ship fragments of exploding ship
+for (let i = shipFragments.length - 1; i >= 0; i--) {
+  let f = shipFragments[i];
+  // Move
+  f.x += f.vx;
+  f.y += f.vy;
+  f.angle += f.rotation;
+  f.life--;
+
+  // Wrap around edges if desired
+  if (f.x < 0) f.x = canvas.width;
+  if (f.x > canvas.width) f.x = 0;
+  if (f.y < 0) f.y = canvas.height;
+  if (f.y > canvas.height) f.y = 0;
+
+  // Draw
+  ctx.save();
+  ctx.translate(f.x, f.y);
+  ctx.rotate(f.angle);
+  ctx.strokeStyle = "white";
+  ctx.beginPath();
+  // Something triangular or rectangular
+  ctx.moveTo(-f.size/2, -f.size/2);
+  ctx.lineTo(f.size/2, -f.size/2);
+  ctx.lineTo(0, f.size/2);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+
+  // Remove if life <= 0
+  if (f.life <= 0) {
+    shipFragments.splice(i, 1);
+  }
+}
+
+// Draw Grid or BG for Levels
+if (!blackHoles || blackHoles.length === 0) {
+    //console.log("⚠️ No black holes exist, grid won't be distorted!");
+} else {
+    drawGrid(ctx, blackHoles);
+}
+
+//debugCanvasSize(); // 📢 Show canvas size on-screen
+// Ensure only ONE game loop is running
+if (gameLoopID) {
+        cancelAnimationFrame(gameLoopID); // Stop any existing game loop before starting a new one
+    }
+gameLoopID = requestAnimationFrame(update); // Store the frame ID
+
+}
+update();
+</script>
+</body>
+</html>

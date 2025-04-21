@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Play Asteroids Online - classic Atari arcade game</title>
+  <meta name="description" content="Play Asteroids Online and relive the classic Atari arcade game experience! Enjoy retro space shooter action, challenging gameplay, and authentic vector graphics in this timeless arcade game." />
+  <meta name="keywords" content="Asteroids, Atari, arcade game, space shooter, retro gaming, classic arcade, vector graphics, online game, vintage gaming, Battlezone, Lunar Lander, Ed Logg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Load Roboto for easy reading -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset and basic styling */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #000;
+      color: #FFF;
+      line-height: 1.5;
+    }
+    header {
+      text-align: center;
+      background-color: #111;
+      border-bottom: 3px solid #0FF;
+      padding: 20px;
+    }
+    header img {
+      max-width: 1024px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    /* Container for the play button and control instructions */
+    .play-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      margin: 20px;
+    }
+    .controls {
+      font-size: 1.0rem;
+      color: #FFF;
+      text-align: left;
+      width: 200px;
+    }
+    /* Coin-slot style PLAY NOW button */
+    .arcade-button {
+      display: block;
+      width: 180px;
+      height: 200px;
+      background: linear-gradient(to bottom, #B30000, #FF6000);
+      border: 2px solid #C13500;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255, 96, 0, 0.7);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .arcade-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 18px rgba(255, 96, 0, 1);
+    }
+    .arcade-button:active {
+      transform: scale(0.98);
+      box-shadow: 0 0 8px rgba(255, 96, 0, 0.7);
+    }
+    /* Coin slot on the left side */
+    .arcade-button::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 10px;
+      width: 20px;
+      height: 180px;
+      background: #000;
+      border-radius: 4px;
+      box-shadow: inset 0 0 6px #555;
+    }
+    /* Black panel for text */
+    .button-text {
+      position: absolute;
+      left: 40px;
+      right: 10px;
+      top: 20px;
+      bottom: 20px;
+      background: #000;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 0 6px #333;
+    }
+    .button-text span {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #FFC400;
+      text-shadow: 0 0 8px #FF6000;
+      text-align: center;
+      padding: 0 10px;
+    }
+    /* Scores Section with five columns */
+    .scores-section {
+      padding: 40px 20px;
+      background-color: #181818;
+    }
+    .scores-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 20px;
+    }
+    .score-category {
+      flex: 1 1 18%;
+      min-width: 180px;
+      padding: 10px;
+      border: 2px solid #0FF;
+      border-radius: 5px;
+      background-color: #111;
+      box-shadow: 0 0 10px #0FF;
+    }
+    .score-category h2 {
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #0FF;
+      padding-bottom: 5px;
+      text-shadow: 0 0 5px #0FF;
+    }
+    .score-category ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 1rem;
+    }
+    .score-category li {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed #666;
+    }
+    .score-category li:last-child {
+      border: none;
+    }
+    /* Content sections */
+    .content-section {
+      padding: 40px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .content-section h2 {
+      color: #0FF;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+    .content-section p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="images/asteroidsBanner.jpg" alt="Asteroids Banner">
+  </header>
+
+  <div class="play-container">
+    <div class="controls">
+      [w] = thrust<br>
+      [a] = rotate left<br>
+      [d] = rotate right<br>
+      [space] / mouse = fire<br>
+      [e] = hyperspace<br>
+    </div>
+    <div class="arcade-button" id="playNowBtn">
+      <div class="button-text">
+        <span>25 &cent; <br> PLAY NOW</span>
+      </div>
+    </div>
+    <div class="controls">
+      asteroid lg = 20<br>
+      asteroid md = 50<br>
+      asteroid sm = 100<br>
+      ufo large = 200<br>
+      ufo small = 1000<br>
+      best played 1024x768 or higher
+    </div>
+  </div>
+
+  <!-- Scores Section (5 Columns) -->
+  <section class="scores-section">
+    <div class="scores-container">
+      <div class="score-category" id="allTimeScores">
+        <h2>ALL-TIME HIGH SCORES</h2>
+        <ul></ul>
+      </div>
+      <div class="score-category" id="monthlyScores">
+        <h2>MONTHLY HIGH SCORES</h2>
+        <ul></ul>
+      </div>
+      <div class="score-category" id="weeklyScores">
+        <h2>WEEKLY HIGH SCORES</h2>
+        <ul></ul>
+      </div>
+      <div class="score-category" id="dailyScores">
+        <h2>DAILY HIGH SCORES</h2>
+        <ul></ul>
+      </div>
+      <div class="score-category" id="last20Scores">
+        <h2>LAST 20 GAMES</h2>
+        <ul></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Recreating Asteroids</h2>
+    <p>
+      Asteroids first hit arcades in 1979 when I was just 11 years old, and I remember spending countless quarters just to play it. 
+      The game was simple but undeniably addictive. In my attempt recreating the original, I relied on historical notes and archival research to capture its authentic look and feel as accurately as possible.
+    </p>
+    <p>
+     I used the exact vector drawing of the ship and asteroids to redraw the graphics. The game was played using vector style graphics so I tried to maintain
+     the look, feel and size of the monitor. Asteroids spawn in the same numbers as did the game come in Large, Med and Small with scores of 20, 50 , 100 like they did in the game.
+    <img src= "images/rockimages.png" alt="Asteroids" style="width: 100%; max-width: 600px; margin: 20px auto; display: block;">
+     <p>
+      The only deliberate change I made was allowing high score names to be longer than the original three characters. 
+      I want to emphasize that I have no affiliation with Atari; I simply used the Asteroids and Atari to recreate the game as authentic as possible.
+    </p>
+  </section>
+
+  <section class="content-section">
+    <h2>Brief History of Asteroids</h2>
+    <p>
+      Released in 1979 by Atari Inc., Asteroids quickly became one of the most iconic arcade games of its era. Developed by a team that included renowned figures like Ed Logg, the game was a prime example of Atari’s ability to push the boundaries of technology and gameplay during the late 1970s. Its release marked a turning point in arcade history, as it offered players a brand-new experience set against the vast emptiness of space.
+    </p>
+    <p>
+      <b>Influence and Innovation – From Lunar Lander to a Space Odyssey</b><br>
+      Asteroids was not created in a vacuum. It drew inspiration from earlier Atari successes such as Lunar Lander, a game that emphasized precision and the struggle against gravity. While Lunar Lander challenged players to safely navigate a spacecraft onto a lunar surface, Asteroids expanded on the concept by immersing players in an endless, asteroid-filled void. This evolution from one focused landing task to continuous, free-form space navigation contributed to the game’s addictive challenge and relentless pace.
+    </p>
+    <p>
+      <b>The Magic of Vector Graphics</b><br>
+      One of Asteroids’ most distinguishing features was its use of vector graphics. Instead of traditional pixel-based sprites, the game rendered its visuals using bright, glowing lines that traced the shapes of asteroids, the ship, and other objects. This method not only produced a uniquely futuristic and crisp display but also allowed for smooth rotations and scaling effects that set Asteroids apart from other titles of its time.
+    </p>
+    <p>
+      <b>Commercial Success and Cultural Impact</b><br>
+      Asteroids was a runaway commercial success. At its peak, the game was one of the highest-earning arcade titles, reportedly generating tens of millions of dollars in quarters worldwide. This immense revenue helped solidify Atari’s reputation as a pioneer in the video game industry and ensured Asteroids’ place in arcade folklore.
+    </p>
+  </section>
+  
+  <script>
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    // Redirect to the game page when the PLAY NOW button is clicked.
+    document.getElementById("playNowBtn").addEventListener("click", function(){
+      window.location.href = "asteroids.html";
+    });
+
+    function populateScores(endpoint, elementId) {
+  // Add a unique cache-busting query parameter
+  const url = endpoint + (endpoint.indexOf('?') === -1 ? '?' : '&') + 'nocache=' + new Date().getTime();
+  
+  fetch(url)
+    .then(response => response.json())
+    .then(scores => {
+      const ul = document.querySelector(`#${elementId} ul`);
+      ul.innerHTML = "";
+      if (elementId === "last20Scores") {
+        if (scores.length > 0 && scores[0].playedAt) {
+          scores.sort((a, b) => new Date(b.playedAt) - new Date(a.playedAt));
+        } else {
+          console.warn("playedAt property not found in scores; check API response.");
+        }
+      }
+      
+      scores.slice(0, 20).forEach((scoreObj, index) => {
+        let emoji = "";
+        if (elementId !== "last20Scores") {
+          if (index === 0) {
+            emoji = "🚀 "; // 1st place: Rocket
+          } else if (index === 1) {
+            emoji = "🪐 "; // 2nd place: Ringed planet
+          } else if (index === 2) {
+            emoji = "🌠 "; // 3rd place: Shooting star
+          }
+        }
+        let mobileEmoji = "";
+        if (scoreObj.deviceType && scoreObj.deviceType.toLowerCase() === "mobile") {
+          mobileEmoji = "📱 ";
+        }
+        const li = document.createElement("li");
+        li.innerHTML = `<span>${index + 1}. ${scoreObj.username} ${emoji}${mobileEmoji}&nbsp;&nbsp;</span><span>${scoreObj.score}</span>`;
+        ul.appendChild(li);
+      });
+    })
+    .catch(error => console.error("Error fetching scores from " + endpoint, error));
+}
+
+
+    // Populate score categories (update API endpoints as needed).
+    populateScores("../get_highscores.php?cat=alltime", "allTimeScores");
+    populateScores("../get_highscores.php?cat=monthly", "monthlyScores");
+    populateScores("../get_highscores.php?cat=weekly", "weeklyScores");
+    populateScores("../get_highscores.php?cat=daily", "dailyScores");
+    populateScores("../get_highscores.php?cat=last20", "last20Scores");
+  </script>
+  <a href="asteroidsMobile.html?nocache=123">AsterMobile</a>
+</body>
+</html>
