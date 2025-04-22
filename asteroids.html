@@ -3141,50 +3141,102 @@ function startNewLevel(level) {
     }
 }
   // ======================================================== DATABASE CALLS
+// // === GET HIGH SCORES FROM DATABASE
+// function getHighScore() {
+//   console.log("../getHighScore function");
+//   //fetch("../get_highscores.php")
+//   fetch("../test_highscores_db.php")
+//     .then(response => response.json())
+//     .then(scores => {
+//       highScores = scores; // Store scores in the variable
+      
+//       // Optional: sort scores in descending order if not already sorted.
+//       highScores.sort((a, b) => b.score - a.score);
+      
+//       // Update topScore with the highest score.
+//       if (highScores.length > 0) {
+//         topScore = highScores[0].score;
+//         // If there are at least 20 scores, set topScore20 to the 20th highest score,
+//         // otherwise, use a default value.
+//         if (highScores.length >= 20) {
+//           topScore20 = highScores[19].score; // 20th score (index 19)
+//         } else {
+//           topScore20 = 123;
+//         }
+//       }
+//       console.log("Fetched High Scores:", highScores);
+//     })
+//     .catch(error => console.error("Error fetching scores:", error));
+// }
+
+
+//   //////////////////////////////////////////////
+//   // === SAVE HIGH SCORE TO DATABASE USING PHP
+//   function saveHighScore(playerName, score) {
+//     console.log(" Save High Score via ../get_highscore function" + score); // Debugging output
+//     //fetch("../get_highscores.php", {
+//       fetch("test_highscores_db.php", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: new URLSearchParams({ playerName: playerName, score: score, deviceType: deviceType, gameID: gameID, gameVersion: gameVersion})
+//     })
+//     .then(response => response.json())
+//     .then(data => console.log("High score saved:", data))
+//     .catch(error => console.error("Error saving score:", error));
+//     //setTimeout(() => {
+//       //window.location.href = "index.html"; // Redirect to main asteroids page
+//     //}, 6000); // Redirects after 3 seconds
+//   }
 // === GET HIGH SCORES FROM DATABASE
 function getHighScore() {
-  console.log("../getHighScore function");
-  fetch("../get_highscores.php")
-    .then(response => response.json())
+  fetch('/highscores?cat=alltime')
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
     .then(scores => {
-      highScores = scores; // Store scores in the variable
-      
-      // Optional: sort scores in descending order if not already sorted.
+      // scores is now an Array of { username, score, devicetype, … }
+      highScores = scores;
+
+      // sort descending just in case
       highScores.sort((a, b) => b.score - a.score);
-      
-      // Update topScore with the highest score.
-      if (highScores.length > 0) {
-        topScore = highScores[0].score;
-        // If there are at least 20 scores, set topScore20 to the 20th highest score,
-        // otherwise, use a default value.
-        if (highScores.length >= 20) {
-          topScore20 = highScores[19].score; // 20th score (index 19)
-        } else {
-          topScore20 = 123;
-        }
+
+      if (highScores.length) {
+        topScore   = highScores[0].score;
+        topScore20 = highScores[19]
+          ? highScores[19].score
+          : topScore; 
       }
       console.log("Fetched High Scores:", highScores);
     })
-    .catch(error => console.error("Error fetching scores:", error));
+    .catch(err => console.error("Error fetching scores:", err));
 }
 
 
-  //////////////////////////////////////////////
-  // === SAVE HIGH SCORE TO DATABASE USING PHP
-  function saveHighScore(playerName, score) {
-    console.log(" Save High Score via ../get_highscore function" + score); // Debugging output
-    fetch("../get_highscores.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ playerName: playerName, score: score, deviceType: deviceType, gameID: gameID, gameVersion: gameVersion})
-    })
-    .then(response => response.json())
-    .then(data => console.log("High score saved:", data))
-    .catch(error => console.error("Error saving score:", error));
-    //setTimeout(() => {
-      //window.location.href = "index.html"; // Redirect to main asteroids page
-    //}, 6000); // Redirects after 3 seconds
-  }
+// === SAVE HIGH SCORE TO DATABASE
+function saveHighScore(playerName, score) {
+  const payload = {
+    username:    playerName,
+    score:       score,
+    devicetype:  deviceType,    // match your DB column
+    gameid:      gameID,
+    gameversion: gameVersion
+  };
+
+  fetch('/highscores', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  })
+  .then(data => console.log("High score saved:", data))
+  .catch(err => console.error("Error saving score:", err));
+}
+
+
   //=======================END DATABASE CALLS=========================
 
 // DRAW ICON FOR LIVES LEFT

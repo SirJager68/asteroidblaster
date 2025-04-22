@@ -261,53 +261,91 @@
       window.location.href = "asteroids.html";
     });
 
-    function populateScores(endpoint, elementId) {
-  // Add a unique cache-busting query parameter
-  const url = endpoint + (endpoint.indexOf('?') === -1 ? '?' : '&') + 'nocache=' + new Date().getTime();
+//     function populateScores(endpoint, elementId) {
+//   // Add a unique cache-busting query parameter
+//   const url = endpoint + (endpoint.indexOf('?') === -1 ? '?' : '&') + 'nocache=' + new Date().getTime();
   
-  fetch(url)
-    .then(response => response.json())
-    .then(scores => {
-      const ul = document.querySelector(`#${elementId} ul`);
-      ul.innerHTML = "";
-      if (elementId === "last20Scores") {
-        if (scores.length > 0 && scores[0].playedAt) {
-          scores.sort((a, b) => new Date(b.playedAt) - new Date(a.playedAt));
-        } else {
-          console.warn("playedAt property not found in scores; check API response.");
-        }
-      }
+//   fetch(url)
+//     .then(response => response.json())
+//     .then(scores => {
+//       const ul = document.querySelector(`#${elementId} ul`);
+//       ul.innerHTML = "";
+//       if (elementId === "last20Scores") {
+//         if (scores.length > 0 && scores[0].playedAt) {
+//           scores.sort((a, b) => new Date(b.playedAt) - new Date(a.playedAt));
+//         } else {
+//           console.warn("playedAt property not found in scores; check API response.");
+//         }
+//       }
       
-      scores.slice(0, 20).forEach((scoreObj, index) => {
-        let emoji = "";
-        if (elementId !== "last20Scores") {
-          if (index === 0) {
-            emoji = "🚀 "; // 1st place: Rocket
-          } else if (index === 1) {
-            emoji = "🪐 "; // 2nd place: Ringed planet
-          } else if (index === 2) {
-            emoji = "🌠 "; // 3rd place: Shooting star
-          }
-        }
-        let mobileEmoji = "";
-        if (scoreObj.deviceType && scoreObj.deviceType.toLowerCase() === "mobile") {
-          mobileEmoji = "📱 ";
-        }
-        const li = document.createElement("li");
-        li.innerHTML = `<span>${index + 1}. ${scoreObj.username} ${emoji}${mobileEmoji}&nbsp;&nbsp;</span><span>${scoreObj.score}</span>`;
-        ul.appendChild(li);
-      });
-    })
-    .catch(error => console.error("Error fetching scores from " + endpoint, error));
-}
+//       scores.slice(0, 20).forEach((scoreObj, index) => {
+//         let emoji = "";
+//         if (elementId !== "last20Scores") {
+//           if (index === 0) {
+//             emoji = "🚀 "; // 1st place: Rocket
+//           } else if (index === 1) {
+//             emoji = "🪐 "; // 2nd place: Ringed planet
+//           } else if (index === 2) {
+//             emoji = "🌠 "; // 3rd place: Shooting star
+//           }
+//         }
+//         let mobileEmoji = "";
+//         if (scoreObj.deviceType && scoreObj.deviceType.toLowerCase() === "mobile") {
+//           mobileEmoji = "📱 ";
+//         }
+//         const li = document.createElement("li");
+//         li.innerHTML = `<span>${index + 1}. ${scoreObj.username} ${emoji}${mobileEmoji}&nbsp;&nbsp;</span><span>${scoreObj.score}</span>`;
+//         ul.appendChild(li);
+//       });
+//     })
+//     .catch(error => console.error("Error fetching scores from " + endpoint, error));
+// }
 
+function populateScores(cat, elementId) {
+        const url = `/highscores?cat=${encodeURIComponent(cat)}&nocache=${Date.now()}`;
+
+        fetch(url)
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+          })
+          .then(rows => {
+            const ul = document.querySelector(`#${elementId} ul`);
+            ul.innerHTML = rows.length
+              ? rows.map((s, i) => {
+                  // emoji logic
+                  let emoji = "";
+                  if (elementId !== "last20Scores") {
+                    if (i === 0) emoji = "🚀 ";
+                    else if (i === 1) emoji = "🪐 ";
+                    else if (i === 2) emoji = "🌠 ";
+                  }
+                  const mobileIcon = (s.devicetype||"").toLowerCase() === "mobile"
+                    ? "📱 " : "";
+                  return `<li>
+                            <span>${i+1}. ${s.username} ${emoji}${mobileIcon}</span>
+                            <span>${s.score}</span>
+                          </li>`;
+                }).join("")
+              : "<li>No scores found.</li>";
+          })
+          .catch(err => {
+            console.error(`Error fetching ${cat}:`, err);
+          });
+      }
 
     // Populate score categories (update API endpoints as needed).
-    populateScores("../get_highscores.php?cat=alltime", "allTimeScores");
-    populateScores("../get_highscores.php?cat=monthly", "monthlyScores");
-    populateScores("../get_highscores.php?cat=weekly", "weeklyScores");
-    populateScores("../get_highscores.php?cat=daily", "dailyScores");
-    populateScores("../get_highscores.php?cat=last20", "last20Scores");
+    // populateScores("../get_highscores.php?cat=alltime", "allTimeScores");
+    // populateScores("../get_highscores.php?cat=monthly", "monthlyScores");
+    // populateScores("../get_highscores.php?cat=weekly", "weeklyScores");
+    // populateScores("../get_highscores.php?cat=daily", "dailyScores");
+    // populateScores("../get_highscores.php?cat=last20", "last20Scores");
+    populateScores("alltime",   "allTimeScores");
+      populateScores("monthly",   "monthlyScores");
+      populateScores("weekly",    "weeklyScores");
+      populateScores("daily",     "dailyScores");
+      populateScores("last20",    "last20Scores");
+
   </script>
   <a href="asteroidsMobile.html?nocache=123">AsterMobile</a>
 </body>
